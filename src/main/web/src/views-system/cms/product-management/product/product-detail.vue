@@ -5,6 +5,10 @@
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Chi tiết Sản phẩm</h4>
         <span style="font-size: 14px;">Thêm mới Sản phẩm</span>
       </div>
+
+      <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="edit">
+        Thêm mới
+      </el-button>
     </div>
 
     <div class="container-form-table" style="padding-top: 0;">
@@ -98,20 +102,23 @@
 
           <el-divider />
 
-          <div v-for="(pd, i) in listProductDetail" :key="i">
+          <div v-for="(pd, i) in product.listProductDetail" :key="i" style="position: relative;">
             <div style="margin-top: 20px; margin-bottom: 20px;">
               <el-form
-                :ref="'dataFormPD' + i"
+                ref="dataFormPD"
                 label-position="left"
                 style="margin-top: 20px;"
+                :v-model="pd"
+                :model="pd"
+                :rules="rulesProductDetail"
               >
                 <el-row :gutter="40">
-                  <el-col :span="9">
+                  <el-col :span="10">
                     <el-row :gutter="20">
                       <el-col :span="24">
                         <el-row :gutter="20">
                           <el-col :span="8">
-                            <el-form-item>
+                            <el-form-item prop="sizeId">
                               <div style="font-weight: bold;">
                                 <div style="float: left;"><span style="color: red;">*</span>Kích cỡ</div>
                                 <div style="float: right; color: #11A983;"><i class="el-icon-circle-plus-outline" /></div>
@@ -134,7 +141,7 @@
                           </el-col>
 
                           <el-col :span="8">
-                            <el-form-item>
+                            <el-form-item prop="colorId">
                               <div style="font-weight: bold;">
                                 <div style="float: left;"><span style="color: red;">*</span>Màu sắc</div>
                                 <div style="float: right; color: #11A983;"><i class="el-icon-circle-plus-outline" /></div>
@@ -157,7 +164,7 @@
                           </el-col>
 
                           <el-col :span="8">
-                            <el-form-item>
+                            <el-form-item prop="materialId">
                               <div style="font-weight: bold;">
                                 <div style="float: left;"><span style="color: red;">*</span>Chất liệu</div>
                                 <div style="float: right; color: #11A983;"><i class="el-icon-circle-plus-outline" /></div>
@@ -183,9 +190,9 @@
                       <el-col :span="24">
                         <el-row :gutter="20">
                           <el-col :span="8">
-                            <el-form-item>
+                            <el-form-item prop="quantity">
                               <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Số lượng</div>
-                              <el-input />
+                              <el-input v-model="pd.quantity" />
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -193,16 +200,16 @@
                     </el-row>
                   </el-col>
 
-                  <el-col :span="15">
+                  <el-col :span="14">
                     <el-form-item>
                       <div style="float: left; font-weight: bold; width: 100%;">Ảnh</div>
                       <div>
                         <el-upload
-                          ref="imageProductUpload"
+                          ref="imagePDUpload"
                           action="#"
                           list-type="picture-card"
                           :auto-upload="false"
-                          :file-list="product.images"
+                          :file-list="pd.listImage"
                         >
                           <i slot="default" class="el-icon-plus" />
                           <div slot="file" slot-scope="{file}">
@@ -219,9 +226,8 @@
                                 <i class="el-icon-zoom-in" />
                               </span>
                               <span
-                                v-if="!disabled"
                                 class="el-upload-list__item-delete"
-                                @click="handleRemove(file)"
+                                @click="handleRemove(file, i)"
                               >
                                 <i class="el-icon-delete" />
                               </span>
@@ -233,6 +239,10 @@
                   </el-col>
                 </el-row>
               </el-form>
+            </div>
+
+            <div style="position: absolute; top: 0; right: 0; bottom: 0">
+              <el-button type="danger" icon="el-icon-delete" circle plain @click="deletePD(i)" />
             </div>
             <el-divider />
           </div>
@@ -266,18 +276,34 @@ export default {
         description: '',
         price: 0,
         brandId: '',
-        categoryId: ''
+        categoryId: '',
+        listProductDetail: [],
+        listImageDelete: []
       },
       listBrandActive: [],
       listCategoryActive: [],
       listColorActive: [],
       listSizeActive: [],
       listMaterialActive: [],
-      listProductDetail: [],
       totalProductCanCreate: 0,
       totalSizeCanCreate: 0,
       totalColorCanCreate: 0,
-      totalMaterialCanCreate: 0
+      totalMaterialCanCreate: 0,
+      rulesProductDetail: {
+        sizeId: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        colorId: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        materialId: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        quantity: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ]
+      },
+      listImageDelete: []
     }
   },
   watch: {
@@ -320,6 +346,20 @@ export default {
   destroyed() {
   },
   methods: {
+    handleRemove(file, i) {
+      console.log(file)
+      if (!file.raw) {
+        this.listImageDelete.push({
+          id: file.id,
+          publicId: file.publicId,
+          url: file.url,
+          type: file.type,
+          secondaryId: file.secondaryId
+        })
+        this.product.listImageDelete = this.listImageDelete
+      }
+      this.$refs.imagePDUpload[i].handleRemove(file)
+    },
     calculateQuantity() {
       this.totalProductCanCreate = this.listColorActive.length * this.listMaterialActive.length * this.listSizeActive.length
       this.totalColorCanCreate = this.listMaterialActive.length * this.listSizeActive.length
@@ -327,29 +367,46 @@ export default {
       this.totalMaterialCanCreate = this.listColorActive.length * this.listSizeActive.length
     },
     hideProperties(properties, idProperties, pd) {
-      if (properties === 'size') {
-        const total = this.listProductDetail.filter(e => e.sizeId === idProperties).length
-        console.log(this.listProductDetail.find(e => e.sizeId === idProperties && e.materialId === pd.materialId && e.colorId === pd.colorId))
-        return total === this.totalSizeCanCreate || this.listProductDetail.find(e => e.sizeId === idProperties && e.materialId === pd.materialId && e.colorId === pd.colorId)
+      if (this.product.listProductDetail.length === this.listColorActive.length * this.listMaterialActive.length * this.listSizeActive.length) {
+        return true
       }
 
-      if (properties === 'color') {
-        const total = this.listProductDetail.filter(e => e.colorId === idProperties).length
-        return total === this.totalColorCanCreate
+      if (properties === 'size' && this.product.listProductDetail.find(e => e.sizeId === idProperties && e.colorId === pd.colorId && e.materialId === pd.materialId)) {
+        return true
       }
 
-      if (properties === 'material') {
-        const total = this.listProductDetail.filter(e => e.materialId === idProperties).length
-        return total === this.totalMaterialCanCreate
+      if (properties === 'color' && this.product.listProductDetail.find(e => e.colorId === idProperties && e.sizeId === pd.sizeId && e.materialId === pd.materialId)) {
+        return true
+      }
+
+      if (properties === 'material' && this.product.listProductDetail.find(e => e.materialId === idProperties && e.colorId === pd.colorId && e.sizeId === pd.sizeId)) {
+        return true
       }
 
       return false
     },
     addProductVariable() {
-      this.listProductDetail.push({
+      this.product.listProductDetail.push({
         colorId: '',
         sizeId: '',
-        materialId: ''
+        materialId: '',
+        quantity: 0,
+        listImage: []
+      })
+    },
+    deletePD(i) {
+      this.product.listProductDetail.splice(i, 1)
+    },
+    edit() {
+      console.log(this.product.listProductDetail)
+      this.product.listProductDetail.forEach((e, i) => {
+        this.$refs.dataFormPD[i].validate(valid => {
+          if (valid) {
+            console.log('được')
+          } else {
+            return false
+          }
+        })
       })
     }
   }
@@ -386,9 +443,9 @@ export default {
     width: unset !important;
   }
 
-  // ::v-deep .mce-edit-area, .mce-container, .mce-panel, .mce-stack-layout-item {
-  //   border-width: 0px 1px 0px 0px !important;
-  // }
+  ::v-deep .mce-edit-area, .mce-container, .mce-panel, .mce-stack-layout-item {
+    border-width: 1px 1px 0px 0px !important;
+  }
 
   ::v-deep .editor-custom-btn-container {
     display: none;
