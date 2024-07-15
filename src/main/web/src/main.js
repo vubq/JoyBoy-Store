@@ -43,6 +43,10 @@ Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
 
+import elementLangVI from 'element-ui/lib/locale/lang/vi'
+import elementLocale from 'element-ui/lib/locale'
+elementLocale.use(elementLangVI)
+
 Vue.config.productionTip = false
 
 new Vue({

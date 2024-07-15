@@ -124,14 +124,32 @@ aside {
   padding: 20px;
 }
 
+.container-form-table {
+  padding: 20px;
+  padding-bottom: 0;
+  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+  transition: all 0.5s ease-in-out;
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid #dbe0e6;
+  box-shadow: none;
+}
+
+.container-form-header {
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
 .components-container {
   margin: 30px 50px;
   position: relative;
 }
 
-.pagination-container {
-  margin-top: 30px;
-}
+// .pagination-container {
+//   margin-top: 30px;
+// }
 
 .text-center {
   text-align: center

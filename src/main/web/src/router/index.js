@@ -135,7 +135,7 @@ export const asyncRoutes = [
   {
     path: '/admin/product-management',
     component: Layout,
-    redirect: '/category',
+    redirect: '/admin/product-management/product',
     name: 'product-management',
     meta: {
       title: 'Quản lý sản phẩm',
@@ -143,16 +143,56 @@ export const asyncRoutes = [
     },
     children: [
       {
+        path: 'product',
+        component: () => import('@/layout-empty'),
+        redirect: '/admin/product-management/product/list',
+        name: 'product-management-product-page',
+        meta: { title: 'Sản phẩm', noCache: true },
+        children: [
+          {
+            path: 'list',
+            component: () => import('@/views-system/cms/product-management/product/index.vue'),
+            name: 'product-management-product-detail-page',
+            meta: { title: 'Sản phẩm', noCache: true }
+          },
+          {
+            path: 'detail',
+            component: () => import('@/views-system/cms/product-management/product/product-detail.vue'),
+            name: 'product-management-product-detail-page',
+            meta: { title: 'Chi tiết Sản phẩm', noCache: true },
+            hidden: true
+          }
+        ]
+      },
+      {
         path: 'category',
         component: () => import('@/views-system/cms/product-management/category/index.vue'),
-        name: 'category-management-page',
+        name: 'product-management-category-page',
         meta: { title: 'Danh mục', noCache: true }
       },
       {
         path: 'brand',
         component: () => import('@/views-system/cms/product-management/brand/index.vue'),
-        name: 'product-management-brand',
+        name: 'product-management-brand-page',
         meta: { title: 'Thương hiệu', noCache: true }
+      },
+      {
+        path: 'size',
+        component: () => import('@/views-system/cms/product-management/size/index.vue'),
+        name: 'product-management-size-page',
+        meta: { title: 'Kích cỡ', noCache: true }
+      },
+      {
+        path: 'color',
+        component: () => import('@/views-system/cms/product-management/color/index.vue'),
+        name: 'product-management-color-page',
+        meta: { title: 'Màu sắc', noCache: true }
+      },
+      {
+        path: 'material',
+        component: () => import('@/views-system/cms/product-management/material/index.vue'),
+        name: 'product-management-material-page',
+        meta: { title: 'Chất liệu', noCache: true }
       }
     ]
   },

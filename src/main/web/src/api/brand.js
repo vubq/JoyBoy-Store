@@ -15,7 +15,7 @@ export const brandGetById = (id) =>
 
 export const brandCreateOrUpdate = (data) =>
   request({
-    url: '/brand/create-or-update',
+    url: '/brand',
     method: 'post',
     data
   })

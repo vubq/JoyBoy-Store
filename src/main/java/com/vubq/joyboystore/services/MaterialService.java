@@ -1,0 +1,23 @@
+package com.vubq.joyboystore.services;
+
+import com.vubq.joyboystore.entities.Material;
+import com.vubq.joyboystore.utils.DataTableRequest;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface MaterialService {
+
+    List<Material> getAll();
+
+    Page<Material> getAllPage(DataTableRequest request, String status);
+
+    Material getById(String id);
+
+    Material save(Material material);
+
+    List<String> getAllByProductId(String productId);
+
+    List<Material> getProductInStock(String productId, String materialId);
+}
