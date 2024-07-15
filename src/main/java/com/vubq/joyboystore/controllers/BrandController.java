@@ -71,4 +71,9 @@ public class BrandController extends BaseController {
         this.brandService.save(brand);
         return Response.build().ok();
     }
+
+    @GetMapping("get-all-status-active")
+    public Response getAllStatusActive() {
+        return Response.build().ok().data(this.brandService.getAllStatusActive());
+    }
 }

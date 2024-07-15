@@ -71,4 +71,9 @@ public class MaterialController extends BaseController {
         this.materialService.save(material);
         return Response.build().ok();
     }
+
+    @GetMapping("get-all-status-active")
+    public Response getAllStatusActive() {
+        return Response.build().ok().data(this.materialService.getAllStatusActive());
+    }
 }

@@ -19,3 +19,9 @@ export const colorCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const colorGetAllStatusActive = () =>
+  request({
+    url: '/color/get-all-status-active',
+    method: 'get'
+  })

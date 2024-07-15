@@ -1,6 +1,8 @@
 package com.vubq.joyboystore.repositories;
 
+import com.vubq.joyboystore.entities.Brand;
 import com.vubq.joyboystore.entities.Color;
+import com.vubq.joyboystore.enums.EStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,4 +20,6 @@ public interface ColorRepository extends JpaRepository<Color, String> {
 
     @Query(value = "SELECT c FROM Color c JOIN ProductDetail pd ON c.id = pd.color.id WHERE pd.product.id = :productId AND c.id = :colorId AND pd.quantity > 0")
     List<Color> getProductInStock(String productId, String colorId);
+
+    List<Color> findAllByStatus(EStatus status);
 }

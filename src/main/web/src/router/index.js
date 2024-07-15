@@ -152,13 +152,13 @@ export const asyncRoutes = [
           {
             path: 'list',
             component: () => import('@/views-system/cms/product-management/product/index.vue'),
-            name: 'product-management-product-detail-page',
+            name: 'product-management-product-detail-list-page',
             meta: { title: 'Sản phẩm', noCache: true }
           },
           {
             path: 'detail',
             component: () => import('@/views-system/cms/product-management/product/product-detail.vue'),
-            name: 'product-management-product-detail-page',
+            name: 'product-management-product-detail-detail-page',
             meta: { title: 'Chi tiết Sản phẩm', noCache: true },
             hidden: true
           }
@@ -197,30 +197,30 @@ export const asyncRoutes = [
     ]
   },
 
-  {
-    path: '/admin/user-management',
-    component: Layout,
-    redirect: '/category',
-    name: 'user-management',
-    meta: {
-      title: 'Quản lý người dùng',
-      icon: 'component'
-    },
-    children: [
-      {
-        path: 'customer-at-the-shop',
-        component: () => import('@/views-system/cms/user-management/customer-at-the-shop.vue'),
-        name: 'customer-at-the-shop',
-        meta: { title: 'Khách mua tại của hàng', noCache: true }
-      },
-      {
-        path: 'customer-at-the-shop',
-        component: () => import('@/views-system/cms/user-management/customer-at-the-shop.vue'),
-        name: 'customer-at-the-shop',
-        meta: { title: 'Khách mua tại của hàng', noCache: true }
-      }
-    ]
-  },
+  // {
+  //   path: '/admin/user-management',
+  //   component: Layout,
+  //   redirect: '/category',
+  //   name: 'user-management',
+  //   meta: {
+  //     title: 'Quản lý người dùng',
+  //     icon: 'component'
+  //   },
+  //   children: [
+  //     {
+  //       path: 'customer-at-the-shop',
+  //       component: () => import('@/views-system/cms/user-management/customer-at-the-shop.vue'),
+  //       name: 'customer-at-the-shop',
+  //       meta: { title: 'Khách mua tại của hàng', noCache: true }
+  //     },
+  //     {
+  //       path: 'customer-at-the-shop',
+  //       component: () => import('@/views-system/cms/user-management/customer-at-the-shop.vue'),
+  //       name: 'customer-at-the-shop',
+  //       meta: { title: 'Khách mua tại của hàng', noCache: true }
+  //     }
+  //   ]
+  // },
 
   {
     path: '/permission',

@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.entities.Size;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.repositories.SizeRepository;
 import com.vubq.joyboystore.services.SizeService;
 import com.vubq.joyboystore.utils.BaseSpecification;
@@ -62,5 +63,10 @@ public class SizeServiceImpl implements SizeService {
     @Override
     public List<Size> getProductInStock(String productId, String sizeId) {
         return this.sizeRepository.getProductInStock(productId, sizeId);
+    }
+
+    @Override
+    public List<Size> getAllStatusActive() {
+        return this.sizeRepository.findAllByStatus(EStatus.ACTIVE);
     }
 }

@@ -19,3 +19,9 @@ export const sizeCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const sizeGetAllStatusActive = () =>
+  request({
+    url: '/size/get-all-status-active',
+    method: 'get'
+  })

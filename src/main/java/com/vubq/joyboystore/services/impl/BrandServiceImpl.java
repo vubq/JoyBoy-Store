@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.entities.Brand;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.repositories.BrandRepository;
 import com.vubq.joyboystore.services.BrandService;
 import com.vubq.joyboystore.utils.BaseSpecification;
@@ -52,5 +53,10 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public Brand save(Brand brand) {
         return this.brandRepository.save(brand);
+    }
+
+    @Override
+    public List<Brand> getAllStatusActive() {
+        return this.brandRepository.findAllByStatus(EStatus.ACTIVE);
     }
 }

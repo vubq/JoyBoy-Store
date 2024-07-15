@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.entities.Color;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.repositories.ColorRepository;
 import com.vubq.joyboystore.services.ColorService;
 import com.vubq.joyboystore.utils.BaseSpecification;
@@ -62,5 +63,10 @@ public class ColorServiceImpl implements ColorService {
     @Override
     public List<Color> getProductInStock(String productId, String colorId) {
         return this.colorRepository.getProductInStock(productId, colorId);
+    }
+
+    @Override
+    public List<Color> getAllStatusActive() {
+        return this.colorRepository.findAllByStatus(EStatus.ACTIVE);
     }
 }

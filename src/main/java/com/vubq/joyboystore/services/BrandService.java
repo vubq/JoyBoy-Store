@@ -16,4 +16,6 @@ public interface BrandService {
     Brand getById(String id);
 
     Brand save(Brand brand);
+
+    List<Brand> getAllStatusActive();
 }

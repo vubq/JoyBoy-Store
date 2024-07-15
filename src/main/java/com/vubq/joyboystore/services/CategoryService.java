@@ -15,4 +15,6 @@ public interface CategoryService {
     Category getById(String id);
 
     Category save(Category category);
+
+    List<Category> getAllStatusActive();
 }

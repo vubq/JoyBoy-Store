@@ -19,3 +19,9 @@ export const categoryCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const categoryGetAllStatusActive = () =>
+  request({
+    url: '/category/get-all-status-active',
+    method: 'get'
+  })

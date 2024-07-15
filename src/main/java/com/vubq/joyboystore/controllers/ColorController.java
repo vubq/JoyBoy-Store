@@ -71,4 +71,9 @@ public class ColorController extends BaseController {
         this.colorService.save(color);
         return Response.build().ok();
     }
+
+    @GetMapping("get-all-status-active")
+    public Response getAllStatusActive() {
+        return Response.build().ok().data(this.colorService.getAllStatusActive());
+    }
 }

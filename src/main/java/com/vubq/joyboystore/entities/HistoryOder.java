@@ -25,8 +25,9 @@ public class HistoryOder {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "order_id")
-    private String orderId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @Column(name = "created_at")
     private Date createdAt;

@@ -5,7 +5,6 @@ import com.vubq.joyboystore.utils.DataTableRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MaterialService {
 
@@ -20,4 +19,6 @@ public interface MaterialService {
     List<String> getAllByProductId(String productId);
 
     List<Material> getProductInStock(String productId, String materialId);
+
+    List<Material> getAllStatusActive();
 }

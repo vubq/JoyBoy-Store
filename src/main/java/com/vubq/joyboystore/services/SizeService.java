@@ -1,5 +1,6 @@
 package com.vubq.joyboystore.services;
 
+import com.vubq.joyboystore.entities.Material;
 import com.vubq.joyboystore.entities.Size;
 import com.vubq.joyboystore.utils.DataTableRequest;
 import org.springframework.data.domain.Page;
@@ -19,4 +20,6 @@ public interface SizeService {
     List<String> getAllByProductId(String productId);
 
     List<Size> getProductInStock(String productId, String sizeId);
+
+    List<Size> getAllStatusActive();
 }

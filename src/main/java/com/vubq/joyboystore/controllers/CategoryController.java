@@ -71,4 +71,9 @@ public class CategoryController extends BaseController {
         this.categoryService.save(category);
         return Response.build().ok();
     }
+
+    @GetMapping("get-all-status-active")
+    public Response getAllStatusActive() {
+        return Response.build().ok().data(this.categoryService.getAllStatusActive());
+    }
 }

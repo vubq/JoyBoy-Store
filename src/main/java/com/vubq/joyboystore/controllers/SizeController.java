@@ -71,4 +71,9 @@ public class SizeController extends BaseController {
         this.sizeService.save(size);
         return Response.build().ok();
     }
+
+    @GetMapping("get-all-status-active")
+    public Response getAllStatusActive() {
+        return Response.build().ok().data(this.sizeService.getAllStatusActive());
+    }
 }

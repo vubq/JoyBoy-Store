@@ -19,3 +19,9 @@ export const brandCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const brandGetAllStatusActive = () =>
+  request({
+    url: '/brand/get-all-status-active',
+    method: 'get'
+  })

@@ -19,3 +19,9 @@ export const materialCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const materialGetAllStatusActive = () =>
+  request({
+    url: '/material/get-all-status-active',
+    method: 'get'
+  })

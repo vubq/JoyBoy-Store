@@ -19,4 +19,6 @@ public interface ColorService {
     List<String> getAllByProductId(String productId);
 
     List<Color> getProductInStock(String productId, String colorId);
+
+    List<Color> getAllStatusActive();
 }

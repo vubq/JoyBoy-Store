@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.entities.Material;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.repositories.MaterialRepository;
 import com.vubq.joyboystore.services.MaterialService;
 import com.vubq.joyboystore.utils.BaseSpecification;
@@ -63,5 +64,10 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     public List<Material> getProductInStock(String productId, String materialId) {
         return this.materialRepository.getProductInStock(productId, materialId);
+    }
+
+    @Override
+    public List<Material> getAllStatusActive() {
+        return this.materialRepository.findAllByStatus(EStatus.ACTIVE);
     }
 }

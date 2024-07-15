@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.entities.Category;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.repositories.CategoryRepository;
 import com.vubq.joyboystore.services.CategoryService;
 import com.vubq.joyboystore.utils.BaseSpecification;
@@ -52,5 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category save(Category category) {
         return this.categoryRepository.save(category);
+    }
+
+    @Override
+    public List<Category> getAllStatusActive() {
+        return this.categoryRepository.findAllByStatus(EStatus.ACTIVE);
     }
 }
