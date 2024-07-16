@@ -23,9 +23,6 @@ public class ProductDetail {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "code")
-    private String code;
-
     @Column(name = "price")
     private Double price;
 

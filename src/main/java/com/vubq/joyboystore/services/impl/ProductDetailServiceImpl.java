@@ -30,7 +30,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     public Page<ProductDetail> getAllBySearchCriteria(DataTableRequest dataTableRequest) {
         PageRequest pageable = dataTableRequest.toPageable();
         BaseSpecification<ProductDetail> specCodeContains = new BaseSpecification<>(
-                SearchCriteria.builder().keys(new String[]{ProductDetail.Fields.code}).operation(SearchOperation.CONTAINS)
+                SearchCriteria.builder().keys(new String[]{ProductDetail.Fields.id}).operation(SearchOperation.CONTAINS)
                         .value(dataTableRequest.getFilter().trim().toUpperCase()).build());
 
         return this.productDetailRepository.findAll(Specification.where(specCodeContains), pageable);

@@ -11,7 +11,7 @@
       </el-button>
     </div>
 
-    <div class="container-form-table" style="padding-top: 0;">
+    <div class="container-form-table" style="padding-top: 0; padding-bottom: 20px">
       <el-collapse v-model="activeNames" style="border-top: 0;">
         <el-collapse-item name="product-information">
           <template slot="title">
@@ -51,7 +51,7 @@
                   </div>
 
                   <el-select
-                    v-model="product.category"
+                    v-model="product.categoryId"
                     style="width: 100%;"
                     placeholder="Chọn Danh mục"
                   >
@@ -73,7 +73,7 @@
                   </div>
 
                   <el-select
-                    v-model="product.brand"
+                    v-model="product.brandId"
                     style="width: 100%;"
                     placeholder="Chọn Thương hiệu"
                   >
@@ -88,8 +88,12 @@
               </el-col>
             </el-row>
 
-            <el-form-item label="Mô tả" prop="name">
-              <Tinymce ref="editor" :height="200" style="margin-top: 40px;" />
+            <el-form-item prop="name">
+              <div style="font-weight: bold;">
+                <div style="float: left;"><span style="color: red;">*</span>Mô tả</div>
+              </div>
+
+              <Tinymce ref="editor" v-model="product.description" :height="200" style="margin-top: 40px;" />
             </el-form-item>
           </el-form>
         </el-collapse-item>
@@ -190,6 +194,13 @@
                       <el-col :span="24">
                         <el-row :gutter="20">
                           <el-col :span="8">
+                            <el-form-item prop="price">
+                              <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá tiền</div>
+                              <el-input v-model="pd.price" />
+                            </el-form-item>
+                          </el-col>
+
+                          <el-col :span="8">
                             <el-form-item prop="quantity">
                               <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Số lượng</div>
                               <el-input v-model="pd.quantity" />
@@ -227,7 +238,7 @@
                               </span>
                               <span
                                 class="el-upload-list__item-delete"
-                                @click="handleRemove(file, i)"
+                                @click="deletePDImage(file, i)"
                               >
                                 <i class="el-icon-delete" />
                               </span>
@@ -249,7 +260,7 @@
 
           <el-button style="margin-top: 20px; margin-bottom: 20px;" @click="addProductVariable">Thêm mới</el-button>
 
-          <el-divider />
+          <!-- <el-divider /> -->
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -263,7 +274,9 @@ import { categoryGetAllStatusActive } from '@/api/category'
 import { colorGetAllStatusActive } from '@/api/color'
 import { sizeGetAllStatusActive } from '@/api/size'
 import { materialGetAllStatusActive } from '@/api/material'
+import { productCreateOrUpdate } from '@/api/product'
 import { ResponseCode } from '@/enums/enums'
+import axios from 'axios'
 
 export default {
   name: 'ProductManagementProductDetailPage',
@@ -278,6 +291,7 @@ export default {
         brandId: '',
         categoryId: '',
         listProductDetail: [],
+        listImage: [],
         listImageDelete: []
       },
       listBrandActive: [],
@@ -346,17 +360,15 @@ export default {
   destroyed() {
   },
   methods: {
-    handleRemove(file, i) {
-      console.log(file)
+    deletePDImage(file, i) {
       if (!file.raw) {
-        this.listImageDelete.push({
+        this.product.listProductDetail[i].listImageDelete.push({
           id: file.id,
           publicId: file.publicId,
           url: file.url,
           type: file.type,
           secondaryId: file.secondaryId
         })
-        this.product.listImageDelete = this.listImageDelete
       }
       this.$refs.imagePDUpload[i].handleRemove(file)
     },
@@ -391,23 +403,51 @@ export default {
         sizeId: '',
         materialId: '',
         quantity: 0,
-        listImage: []
+        price: 0,
+        listImage: [],
+        listImageDelete: []
       })
     },
     deletePD(i) {
       this.product.listProductDetail.splice(i, 1)
     },
-    edit() {
-      console.log(this.product.listProductDetail)
-      this.product.listProductDetail.forEach((e, i) => {
+    async edit() {
+      // eslint-disable-next-line no-unused-vars
+      var isValidate = true
+      // eslint-disable-next-line no-unused-vars
+      for (const [i, e] of this.product.listProductDetail.entries()) {
+        console.log(e)
         this.$refs.dataFormPD[i].validate(valid => {
-          if (valid) {
-            console.log('được')
-          } else {
+          if (!valid) {
+            isValidate = false
             return false
           }
         })
-      })
+
+        for (const image of this.$refs.imagePDUpload[i].uploadFiles) {
+          if (image.raw) {
+            const data = new FormData()
+            data.append('file', image.raw)
+            data.append('upload_preset', 'vubq-upload')
+            data.append('cloud_name', 'vubq')
+            await axios.post('https://api.cloudinary.com/v1_1/vubq/image/upload', data)
+              .then((res) => {
+                this.product.listProductDetail[i].listImage.push({
+                  publicId: res.data.public_id,
+                  url: res.data.url
+                })
+              })
+          } else {
+            this.product.listProductDetail[i].listImage.push(image)
+          }
+        }
+      }
+
+      if (isValidate) {
+        productCreateOrUpdate(this.product).then(res => {
+          console.log(res)
+        })
+      }
     }
   }
 }
@@ -427,10 +467,14 @@ export default {
     height: 0.5px;
   }
 
-  ::v-deep .collapse-item-custom {
-    .el-collapse-item__header, .el-collapse-item__wrap {
-      border-bottom: none;
-    }
+  // ::v-deep .collapse-item-custom {
+  //   .el-collapse-item__header, .el-collapse-item__wrap {
+  //     border-bottom: none;
+  //   }
+  // }
+
+  ::v-deep .el-collapse-item__content {
+    padding-bottom: 0;
   }
 
   ::v-deep .mce-tinymce {

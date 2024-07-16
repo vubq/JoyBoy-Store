@@ -16,14 +16,14 @@ import java.util.List;
 public class ProductDetailCorUDto {
 
     private String id;
-    private String code;
     private Double price;
     private Integer quantity;
     private String productId;
     private String sizeId;
     private String colorId;
     private String materialId;
-    private List<ImageDto> images;
+    private List<ImageDto> listImage;
+    private List<ImageDto> listImageDelete;
     private Date createdAt;
     private Date updatedAt;
     private String createdBy;
