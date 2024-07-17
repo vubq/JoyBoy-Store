@@ -1,5 +1,6 @@
+<!-- eslint-disable vue/no-use-v-if-with-v-for -->
 <template>
-  <div v-loading="listLoading" class="app-container">
+  <div class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Màu sắc</h4>
@@ -32,6 +33,7 @@
             >
               <el-option
                 v-for="s in listStatus"
+                v-if="s.value !== 'ALL'"
                 :key="s.value"
                 :label="s.label"
                 :value="s.value"
@@ -166,7 +168,7 @@ import { parseTime } from '@/utils'
 import moment from 'moment'
 
 export default {
-  name: 'ProductManagementColorPage',
+  name: 'ProductManagementColorListPage',
   components: { Pagination },
   data() {
     return {

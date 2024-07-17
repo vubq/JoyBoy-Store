@@ -69,4 +69,9 @@ public class SizeServiceImpl implements SizeService {
     public List<Size> getAllStatusActive() {
         return this.sizeRepository.findAllByStatus(EStatus.ACTIVE);
     }
+
+    @Override
+    public List<Size> getAllByIdIn(List<String> idIn) {
+        return this.sizeRepository.getAllByIdIn(idIn);
+    }
 }

@@ -1,12 +1,12 @@
 <template>
-  <div v-loading="listLoading" class="app-container">
+  <div class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Sản phẩm</h4>
         <span style="font-size: 14px;">Quản lý Sản phẩm</span>
       </div>
 
-      <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="toPage('/admin/product-management/product/detail')">
+      <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="toPage('/admin/product-management/product/detail', null)">
         Thêm mới
       </el-button>
     </div>
@@ -143,11 +143,11 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="isBtnFilter">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 430px;">
-              <el-input placeholder="Giá tiền" style="margin-right: 10px;" />
+          <el-form-item v-if="false">
+            <div style="display: flex; align-items: center;">
+              <el-input placeholder="Giá tiền" style="margin-right: 10px; width: 200px;" />
               ~
-              <el-input placeholder="Giá tiền" style="margin-left: 10px;" />
+              <el-input placeholder="Giá tiền" style="margin-left: 10px; width: 200px;" />
             </div>
             <!-- <el-slider
               style="margin: 0 10px 0 10px;"
@@ -175,17 +175,27 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Tên" prop="name" sortable="custom" align="center" />
+        <el-table-column label="Tên" prop="name" sortable="custom" align="center" width="200" />
 
-        <el-table-column label="Mô tả" prop="description" sortable="custom" align="center" />
+        <el-table-column label="Danh mục" prop="categoryName" align="center" width="130" />
 
-        <el-table-column label="Thời gian tạo" prop="createdAt" sortable="custom" align="center">
+        <el-table-column label="Thương hiệu" prop="brandName" align="center" width="130" />
+
+        <el-table-column label="Kích cỡ" prop="listSizeString" align="center" width="200" />
+
+        <el-table-column label="Màu sắc" prop="listColorString" align="center" width="200" />
+
+        <el-table-column label="Chất liệu" prop="listMaterialString" align="center" width="200" />
+
+        <el-table-column label="Mô tả" prop="description" align="center" width="200" />
+
+        <el-table-column label="Thời gian tạo" prop="createdAt" sortable="custom" align="center" width="200">
           <template slot-scope="{row}">
             <span>{{ moment(row.createdAt).format('HH:mm:ss DD-MM-YYYY') }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="Trạng thái" prop="status" align="center" width="150">
+        <el-table-column fixed="right" label="Trạng thái" prop="status" align="center" width="150">
           <template slot-scope="{row}">
             <span v-if="row.status === 'ACTIVE'">
               <el-tag type="success" size="small">Kinh doanh</el-tag>
@@ -196,9 +206,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="" align="center" width="150">
+        <el-table-column fixed="right" label="" align="center" width="150">
           <template slot-scope="{row}">
-            <el-button type="primary" size="small" plain @click="openModalEdit(row.id)">
+            <el-button type="primary" size="small" plain @click="toPage('/admin/product-management/product/detail', { id: row.id })">
               <i class="el-icon-edit" />
             </el-button>
 
@@ -224,7 +234,7 @@ import { categoryGetAll } from '@/api/category'
 import { colorGetAll } from '@/api/color'
 import { sizeGetAll } from '@/api/size'
 import { materialGetAll } from '@/api/material'
-import { productGetAllPage } from '@/api/product'
+import { productGetAllPage, productGetById, productUpdateStatusInActiveById } from '@/api/product'
 
 export default {
   name: 'ProductManagementProductListPage',
@@ -380,6 +390,28 @@ export default {
       this.listQuery.sortDesc = sortChange.order === 'descending'
       this.getList()
     },
+    openConfirmDelete(id) {
+      productGetById(id).then(res1 => {
+        if (res1 && res1.code === ResponseCode.CODE_SUCCESS) {
+          this.$confirm('Chuyển trạng thái thành: "Ngừng kinh doanh", bạn chắc chắn chứ?', 'Xác nhận xóa', {
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+            type: 'warning'
+          }).then(() => {
+            productUpdateStatusInActiveById(res1.data.id).then(res2 => {
+              if (res2 && res2.code === ResponseCode.CODE_SUCCESS) {
+                this.$message({
+                  showClose: true,
+                  message: 'Cập nhật thành công!',
+                  type: 'success'
+                })
+                this.getList()
+              }
+            })
+          })
+        }
+      })
+    },
     exportFileExcel() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
@@ -403,8 +435,11 @@ export default {
         }
       }))
     },
-    toPage(path) {
-      this.$router.push(path)
+    toPage(path, query) {
+      this.$router.push({
+        path: path,
+        query: query
+      })
     }
   }
 }

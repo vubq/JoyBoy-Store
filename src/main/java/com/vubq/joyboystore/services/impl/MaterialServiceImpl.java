@@ -70,4 +70,9 @@ public class MaterialServiceImpl implements MaterialService {
     public List<Material> getAllStatusActive() {
         return this.materialRepository.findAllByStatus(EStatus.ACTIVE);
     }
+
+    @Override
+    public List<Material> getAllByIdIn(List<String> idIn) {
+        return this.materialRepository.getAllByIdIn(idIn);
+    }
 }

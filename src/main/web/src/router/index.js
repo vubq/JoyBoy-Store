@@ -133,12 +133,30 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
+    path: '/admin/sales-at-the-counter',
+    component: Layout,
+    redirect: '/admin/sales-at-the-counter',
+    name: 'sales-at-the-counter',
+    meta: {
+      title: 'Bán hàng tại quầy',
+      icon: 'component'
+    },
+    children: [
+      {
+        path: 'sales',
+        component: () => import('@/views-system/cms/sales-at-the-counter/index.vue'),
+        name: 'sales-at-the-counter-page',
+        meta: { title: 'Bán hàng tại quầy', noCache: true }
+      }
+    ]
+  },
+  {
     path: '/admin/product-management',
     component: Layout,
     redirect: '/admin/product-management/product',
     name: 'product-management',
     meta: {
-      title: 'Quản lý sản phẩm',
+      title: 'Quản lý Sản phẩm',
       icon: 'component'
     },
     children: [
@@ -165,34 +183,52 @@ export const asyncRoutes = [
         ]
       },
       {
-        path: 'category',
+        path: 'category/list',
         component: () => import('@/views-system/cms/product-management/category/index.vue'),
         name: 'product-management-category-page',
         meta: { title: 'Danh mục', noCache: true }
       },
       {
-        path: 'brand',
+        path: 'brand/list',
         component: () => import('@/views-system/cms/product-management/brand/index.vue'),
         name: 'product-management-brand-page',
         meta: { title: 'Thương hiệu', noCache: true }
       },
       {
-        path: 'size',
+        path: 'size/list',
         component: () => import('@/views-system/cms/product-management/size/index.vue'),
         name: 'product-management-size-page',
         meta: { title: 'Kích cỡ', noCache: true }
       },
       {
-        path: 'color',
+        path: 'color/list',
         component: () => import('@/views-system/cms/product-management/color/index.vue'),
         name: 'product-management-color-page',
         meta: { title: 'Màu sắc', noCache: true }
       },
       {
-        path: 'material',
+        path: 'material/list',
         component: () => import('@/views-system/cms/product-management/material/index.vue'),
         name: 'product-management-material-page',
         meta: { title: 'Chất liệu', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/admin/voucher-management',
+    component: Layout,
+    redirect: '/admin/voucher-management/voucher/list',
+    name: 'voucher-management',
+    meta: {
+      title: 'Quản lý Mã giảm giá',
+      icon: 'component'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views-system/cms/voucher-management/index.vue'),
+        name: 'voucher-management-list-page',
+        meta: { title: 'Quản lý Mã giảm giá', noCache: true }
       }
     ]
   },

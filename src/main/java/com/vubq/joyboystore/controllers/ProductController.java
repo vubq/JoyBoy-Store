@@ -4,10 +4,7 @@ import com.vubq.joyboystore.dtos.ImageDto;
 import com.vubq.joyboystore.dtos.ProductCorUDto;
 import com.vubq.joyboystore.dtos.ProductDetailCorUDto;
 import com.vubq.joyboystore.dtos.ProductViewDto;
-import com.vubq.joyboystore.entities.Color;
-import com.vubq.joyboystore.entities.Image;
-import com.vubq.joyboystore.entities.Product;
-import com.vubq.joyboystore.entities.ProductDetail;
+import com.vubq.joyboystore.entities.*;
 import com.vubq.joyboystore.enums.EImageType;
 import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.services.*;
@@ -272,6 +269,7 @@ public class ProductController extends BaseController {
                     .createdBy(pd.getProduct().getCreatedBy())
                     .updatedBy(pd.getProduct().getUpdatedBy())
                     .build();
+
             StringBuilder listColorString = new StringBuilder();
             List<Color> colors = this.colorService.getAllByIdIn(this.colorService.getAllByProductId(pd.getProduct().getId()));
             for (int i = 0; i < colors.size(); i++) {
@@ -282,10 +280,41 @@ public class ProductController extends BaseController {
                 listColorString.append(c.getName());
             }
             productView.setListColorString(listColorString.toString());
+
+            StringBuilder listMaterialString = new StringBuilder();
+            List<Material> materials = this.materialService.getAllByIdIn(this.materialService.getAllByProductId(pd.getProduct().getId()));
+            for (int i = 0; i < materials.size(); i++) {
+                Material m = materials.get(i);
+                if (i > 0) {
+                    listMaterialString.append(", ");
+                }
+                listMaterialString.append(m.getName());
+            }
+            productView.setListMaterialString(listMaterialString.toString());
+
+            StringBuilder listSizeString = new StringBuilder();
+            List<Size> sizes = this.sizeService.getAllByIdIn(this.sizeService.getAllByProductId(pd.getProduct().getId()));
+            for (int i = 0; i < sizes.size(); i++) {
+                Size s = sizes.get(i);
+                if (i > 0) {
+                    listSizeString.append(", ");
+                }
+                listSizeString.append(s.getName());
+            }
+            productView.setListSizeString(listSizeString.toString());
+
             listProductView.add(productView);
         });
         return DataTableResponse.build().ok()
                 .totalRows(result.getTotalElements())
                 .items(listProductView);
+    }
+
+    @PostMapping("update-status-in-active-by-id/{id}")
+    public Response updateStatusInActiveById(@PathVariable String id) {
+        Product product = this.productService.getById(id);
+        product.setStatus(EStatus.IN_ACTIVE);
+        this.productService.save(product);
+        return Response.build().ok();
     }
 }

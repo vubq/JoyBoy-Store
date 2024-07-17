@@ -1,5 +1,6 @@
 package com.vubq.joyboystore.services.impl;
 
+import com.vubq.joyboystore.entities.Size;
 import com.vubq.joyboystore.entities.Voucher;
 import com.vubq.joyboystore.repositories.VoucherRepository;
 import com.vubq.joyboystore.services.VoucherService;
@@ -48,5 +49,28 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public Voucher save(Voucher voucher) {
         return this.voucherRepository.save(voucher);
+    }
+
+    @Override
+    public Page<Voucher> getAllPage(DataTableRequest request, String status) {
+        PageRequest pageable = request.toPageable();
+        BaseSpecification<Voucher> specCodeContains = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Voucher.Fields.code})
+                        .operation(SearchOperation.CONTAINS)
+                        .value(request.getFilter().trim().toUpperCase())
+                        .build());
+        BaseSpecification<Voucher> specStatusEquality = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Size.Fields.status})
+                        .operation(SearchOperation.EQUALITY)
+                        .value(status)
+                        .build());
+        return this.voucherRepository.findAll(Specification.where(specCodeContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
+    }
+
+    @Override
+    public Voucher getById(String id) {
+        return this.voucherRepository.findById(id).orElse(null);
     }
 }

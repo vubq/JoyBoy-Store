@@ -2,10 +2,15 @@ package com.vubq.joyboystore.dtos;
 
 import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.enums.EVoucherType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
 
@@ -13,16 +18,18 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VoucherDTO {
+public class VoucherDto {
 
     private String id;
     private String code;
     private EVoucherType type;
     private Double value;
+    private Integer quantity;
     private Date startDate;
     private Date endDate;
-    private String createdBy;
     private Date createdAt;
+    private Date updatedAt;
+    private String createdBy;
+    private String updatedBy;
     private EStatus status;
-    private Integer quantity;
 }

@@ -13,3 +13,9 @@ export const Status = {
   IN_ACTIVE: 'IN_ACTIVE',
   ALL: 'ALL'
 }
+
+export const VoucherType = {
+  PERCENT: 'PERCENT',
+  MONEY: 'MONEY'
+}
+

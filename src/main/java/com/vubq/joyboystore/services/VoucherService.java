@@ -15,4 +15,8 @@ public interface VoucherService {
     Page<Voucher> getListOfVouchersByCriteria(DataTableRequest request);
 
     Voucher save(Voucher voucher);
+
+    Page<Voucher> getAllPage(DataTableRequest request, String status);
+
+    Voucher getById(String id);
 }

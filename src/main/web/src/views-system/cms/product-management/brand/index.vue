@@ -1,5 +1,6 @@
+<!-- eslint-disable vue/no-use-v-if-with-v-for -->
 <template>
-  <div v-loading="listLoading" class="app-container">
+  <div class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Thương hiệu</h4>
@@ -129,6 +130,7 @@
             <el-select v-model="brand.status" style="width: 100%;" placeholder="">
               <el-option
                 v-for="s in listStatus"
+                v-if="s.value !== 'ALL'"
                 :key="s.value"
                 :label="s.label"
                 :value="s.value"
@@ -166,7 +168,7 @@ import { parseTime } from '@/utils'
 import moment from 'moment'
 
 export default {
-  name: 'ProductManagementBrandPage',
+  name: 'ProductManagementBrandListPage',
   components: { Pagination },
   data() {
     return {

@@ -3,8 +3,8 @@
   <div class="app-container">
     <div class="container-form-header">
       <div>
-        <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Kích cỡ</h4>
-        <span style="font-size: 14px;">Quản lý Kích cỡ</span>
+        <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Mã giảm giá</h4>
+        <span style="font-size: 14px;">Quản lý Mã giảm giá</span>
       </div>
 
       <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="dialogFormVisible = true">
@@ -33,7 +33,6 @@
             >
               <el-option
                 v-for="s in listStatus"
-                v-if="s.value !== 'ALL'"
                 :key="s.value"
                 :label="s.label"
                 :value="s.value"
@@ -69,28 +68,60 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Tên" prop="name" sortable="custom" align="center" />
+        <el-table-column label="Mã" prop="code" sortable="custom" align="center" width="200" />
 
-        <el-table-column label="Mô tả" prop="description" sortable="custom" align="center" />
+        <el-table-column label="Loại giảm giá" prop="description" sortable="custom" align="center" width="150">
+          <template slot-scope="{row}">
+            <span v-if="row.type === VoucherType.PERCENT">
+              <el-tag type="primary">Phần trăm</el-tag>
+            </span>
+            <span v-if="row.type === VoucherType.MONEY">
+              <el-tag type="primary">Tiền</el-tag>
+            </span>
+          </template>
+        </el-table-column>
 
-        <el-table-column label="Thời gian tạo" prop="createdAt" sortable="custom" align="center">
+        <el-table-column label="Giá trị" prop="value" sortable="custom" align="center" width="150">
+          <template slot-scope="{row}">
+            <span v-if="row.type === VoucherType.PERCENT">
+              {{ row.value }}%
+            </span>
+            <span v-if="row.type === VoucherType.MONEY">
+              {{ formatCurrencyVND(row.value) }}
+            </span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Thời gian bắt đầu" prop="createdAt" sortable="custom" align="center" width="200">
+          <template slot-scope="{row}">
+            <span>{{ moment(row.startDate).format('HH:mm:ss DD-MM-YYYY') }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Thời gian kết thúc" prop="createdAt" sortable="custom" align="center" width="200">
+          <template slot-scope="{row}">
+            <span>{{ moment(row.endDate).format('HH:mm:ss DD-MM-YYYY') }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Thời gian tạo" prop="createdAt" sortable="custom" align="center" width="200">
           <template slot-scope="{row}">
             <span>{{ moment(row.createdAt).format('HH:mm:ss DD-MM-YYYY') }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="Trạng thái" prop="status" align="center" width="150">
+        <el-table-column fixed="right" label="Trạng thái" prop="status" align="center" width="150">
           <template slot-scope="{row}">
-            <span v-if="row.status === 'ACTIVE'">
-              <el-tag type="success" size="small">Kinh doanh</el-tag>
+            <span v-if="row.status === Status.ACTIVE">
+              <el-tag type="success" size="small">Hoạt động</el-tag>
             </span>
-            <span v-if="row.status === 'IN_ACTIVE'">
-              <el-tag type="danger" size="small">Ngừng kinh doanh</el-tag>
+            <span v-if="row.status === Status.IN_ACTIVE">
+              <el-tag type="danger" size="small">Kết thúc</el-tag>
             </span>
           </template>
         </el-table-column>
 
-        <el-table-column label="" align="center" width="150">
+        <el-table-column fixed="right" label="" align="center" width="150">
           <template slot-scope="{row}">
             <el-button type="primary" size="small" plain @click="openModalEdit(row.id)">
               <i class="el-icon-edit" />
@@ -107,30 +138,64 @@
 
       <el-dialog
         width="30%"
-        :title="size.id ? 'Chỉnh sửa' : 'Thêm mới'"
+        :title="voucher.id ? 'Chỉnh sửa' : 'Thêm mới'"
         :visible.sync="dialogFormVisible"
         :close-on-click-modal="false"
         @closed="closeModal()"
       >
         <el-form
           ref="dataForm"
-          :model="size"
+          :model="voucher"
           label-position="left"
-          :v-model="size"
+          :v-model="voucher"
           :rules="rules"
         >
-          <el-form-item label="Tên" prop="name">
-            <el-input v-model="size.name" />
+          <el-form-item v-if="voucher.id" label="Mã" prop="code">
+            <el-input v-model="voucher.code" disabled="true" />
           </el-form-item>
 
-          <el-form-item label="Mô tả" prop="description">
-            <el-input v-model="size.description" />
+          <el-form-item label="Loại giảm giá" prop="type">
+            <el-select v-model="voucher.type" style="width: 100%;" placeholder="">
+              <el-option
+                v-for="t in listVoucherType"
+                v-if="t.value !== 'ALL'"
+                :key="t.value"
+                :label="t.label"
+                :value="t.value"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="Giá trị" prop="value">
+            <el-input v-model="voucher.value" />
+          </el-form-item>
+
+          <el-form-item label="Số lượng" prop="quantity">
+            <el-input v-model="voucher.quantity" />
+          </el-form-item>
+
+          <el-form-item label="Thời gian" prop="startDate">
+            <el-date-picker
+              v-model="voucherDate"
+              type="daterange"
+              align="right"
+              unlink-panels
+              range-separator="~"
+              start-placeholder="Từ ngày"
+              end-placeholder="Tới ngày"
+              :clearable="false"
+              format="dd-MM-yyyy"
+              value-format="yyyy-MM-dd"
+              style="width: 100%;"
+              @change="changeVoucherDate()"
+            />
           </el-form-item>
 
           <el-form-item label="Trạng thái" prop="status">
-            <el-select v-model="size.status" style="width: 100%;" placeholder="">
+            <el-select v-model="voucher.status" style="width: 100%;" placeholder="">
               <el-option
                 v-for="s in listStatus"
+                v-if="s.value !== 'ALL'"
                 :key="s.value"
                 :label="s.label"
                 :value="s.value"
@@ -138,12 +203,12 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="size.id && size.createdAt && size.createdBy" style="margin-bottom: 0;">
-            <span>Thời gian tạo: {{ moment(size.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ size.createdBy }})</span>
+          <el-form-item v-if="voucher.id && voucher.createdAt && voucher.createdBy" style="margin-bottom: 0;">
+            <span>Thời gian tạo: {{ moment(voucher.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ voucher.createdBy }})</span>
           </el-form-item>
 
-          <el-form-item v-if="size.id && size.updatedAt && size.updatedBy" style="margin-bottom: 0;">
-            <span>Thời gian cập nhật gần nhất: {{ moment(size.updatedAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ size.updatedBy }})</span>
+          <el-form-item v-if="voucher.id && voucher.updatedAt && voucher.updatedBy" style="margin-bottom: 0;">
+            <span>Thời gian cập nhật gần nhất: {{ moment(voucher.updatedAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ voucher.updatedBy }})</span>
           </el-form-item>
         </el-form>
 
@@ -152,7 +217,7 @@
             Hủy
           </el-button>
           <el-button type="primary" @click="edit()">
-            {{ size.id ? 'Chỉnh sửa' : 'Thêm mới' }}
+            {{ voucher.id ? 'Chỉnh sửa' : 'Thêm mới' }}
           </el-button>
         </div>
       </el-dialog>
@@ -161,18 +226,22 @@
 </template>
 
 <script>
-import { sizeGetAllPage, sizeGetById, sizeCreateOrUpdate } from '@/api/size'
+import { voucherGetAllPage, voucherGetById, voucherCreateOrUpdate } from '@/api/voucher'
 import Pagination from '@/components/Pagination'
-import { ResponseCode, Status } from '@/enums/enums'
+import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { parseTime } from '@/utils'
+import { formatCurrencyVND } from '@/utils/format.js'
 import moment from 'moment'
 
 export default {
-  name: 'ProductManagementSizeListPage',
+  name: 'ProductManagementVoucherListPage',
   components: { Pagination },
   data() {
     return {
       moment: moment,
+      Status: Status,
+      formatCurrencyVND: formatCurrencyVND,
+      VoucherType: VoucherType,
       tableKey: 0,
       list: null,
       total: 0,
@@ -191,29 +260,42 @@ export default {
       },
       listStatus: [
         { value: Status.ALL, label: 'Chọn Trạng thái' },
-        { value: Status.ACTIVE, label: 'Kinh doanh' },
-        { value: Status.IN_ACTIVE, label: 'Ngừng kinh doanh' }
+        { value: Status.ACTIVE, label: 'Hoạt động' },
+        { value: Status.IN_ACTIVE, label: 'Kết thúc' }
+      ],
+      listVoucherType: [
+        { value: Status.ALL, label: 'Chọn Loại mã giảm giá' },
+        { value: VoucherType.MONEY, label: 'Tiền' },
+        { value: VoucherType.PERCENT, label: 'Phần trăm' }
       ],
       dialogFormVisible: false,
       downloadLoading: false,
-      size: {
+      voucher: {
         id: null,
-        name: null,
-        description: null,
+        code: null,
+        type: VoucherType.MONEY,
+        value: 0,
+        quantity: 0,
+        startDate: null,
+        endDate: null,
         createdAt: null,
         updatedAt: null,
         createdBy: null,
         updatedBy: null,
         status: Status.ACTIVE
       },
+      voucherDate: [],
       rules: {
-        name: [
+        type: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        value: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ],
-        description: [
+        quantity: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ],
-        status: [
+        startDate: [
           { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
         ]
       }
@@ -233,7 +315,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      sizeGetAllPage(this.listQuery).then(res => {
+      voucherGetAllPage(this.listQuery).then(res => {
         setTimeout(() => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
             this.listLoading = false
@@ -249,35 +331,44 @@ export default {
       this.getList()
     },
     openModalEdit(id) {
-      sizeGetById(id).then(res => {
+      voucherGetById(id).then(res => {
         this.dialogFormVisible = true
-        this.size = res.data
+        this.voucher = res.data
+        this.voucherDate = [
+          moment(res.data.startDate).format('YYYY-MM-DD'),
+          moment(res.data.endDate).format('YYYY-MM-DD')
+        ]
       })
     },
     closeModal() {
       this.dialogFormVisible = false
       this.$refs['dataForm'].clearValidate()
-      this.size = {
+      this.voucher = {
         id: null,
-        name: null,
-        description: null,
+        code: null,
+        type: VoucherType.MONEY,
+        value: 0,
+        quantity: 0,
+        startDate: null,
+        endDate: null,
         createdAt: null,
         updatedAt: null,
         createdBy: null,
         updatedBy: null,
         status: Status.ACTIVE
       }
+      this.voucherDate = []
     },
     edit() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          if (this.size.id) {
+          if (this.voucher.id) {
             this.$confirm('Bạn xác nhận cập nhật?', 'Xác nhận cập nhật', {
               confirmButtonText: 'Xác nhận',
               cancelButtonText: 'Hủy',
               type: 'warning'
             }).then(() => {
-              sizeCreateOrUpdate(this.size).then(res => {
+              voucherCreateOrUpdate(this.voucher).then(res => {
                 if (res && res.code === ResponseCode.CODE_SUCCESS) {
                   this.$message({
                     showClose: true,
@@ -295,7 +386,7 @@ export default {
               cancelButtonText: 'Hủy',
               type: 'warning'
             }).then(() => {
-              sizeCreateOrUpdate(this.size).then(res => {
+              voucherCreateOrUpdate(this.voucher).then(res => {
                 if (res && res.code === ResponseCode.CODE_SUCCESS) {
                   this.$message({
                     showClose: true,
@@ -314,15 +405,15 @@ export default {
       })
     },
     openConfirmDelete(id) {
-      sizeGetById(id).then(res1 => {
+      voucherGetById(id).then(res1 => {
         if (res1 && res1.code === ResponseCode.CODE_SUCCESS) {
-          this.$confirm('Chuyển trạng thái thành: "Ngừng kinh doanh", bạn chắc chắn chứ?', 'Xác nhận xóa', {
+          this.$confirm('Chuyển trạng thái thành: "Kết thúc", bạn chắc chắn chứ?', 'Xác nhận xóa', {
             confirmButtonText: 'Xác nhận',
             cancelButtonText: 'Hủy',
             type: 'warning'
           }).then(() => {
             res1.data.status = Status.IN_ACTIVE
-            sizeCreateOrUpdate(res1.data).then(res2 => {
+            voucherCreateOrUpdate(res1.data).then(res2 => {
               if (res2 && res2.code === ResponseCode.CODE_SUCCESS) {
                 this.$message({
                   showClose: true,
@@ -349,6 +440,10 @@ export default {
         })
         this.downloadLoading = false
       })
+    },
+    changeVoucherDate() {
+      this.voucher.startDate = new Date(this.voucherDate[0] + ' 00:00:00.000')
+      this.voucher.endDate = new Date(this.voucherDate[1] + ' 23:59:59.999')
     },
     formatJson(filterVal) {
       return this.list.map(v => filterVal.map(j => {

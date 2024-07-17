@@ -1,7 +1,5 @@
 package com.vubq.joyboystore.repositories;
 
-import com.vubq.joyboystore.entities.Brand;
-import com.vubq.joyboystore.entities.Material;
 import com.vubq.joyboystore.entities.Size;
 import com.vubq.joyboystore.enums.EStatus;
 import org.springframework.data.domain.Page;
@@ -25,4 +23,7 @@ public interface SizeRepository extends JpaRepository<Size, String> {
     List<Size> getProductInStock(String productId, String sizeId);
 
     List<Size> findAllByStatus(EStatus status);
+
+    @Query(value = "SELECT s FROM Size s WHERE s.id IN :idIn")
+    List<Size> getAllByIdIn(List<String> idIn);
 }

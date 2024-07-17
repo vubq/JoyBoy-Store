@@ -18,6 +18,8 @@ public interface MaterialService {
 
     List<String> getAllByProductId(String productId);
 
+    List<Material> getAllByIdIn(List<String> idIn);
+
     List<Material> getProductInStock(String productId, String materialId);
 
     List<Material> getAllStatusActive();

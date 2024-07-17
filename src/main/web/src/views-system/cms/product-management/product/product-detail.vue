@@ -707,4 +707,7 @@ export default {
   .el-upload-list__item-actions {
     transition: none !important;
   }
+  ::v-deep .el-loading-spinner {
+    top: 50vh !important;
+  }
 </style>

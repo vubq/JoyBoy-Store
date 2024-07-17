@@ -19,3 +19,9 @@ export const productGetAllPage = (params) =>
     method: 'get',
     params
   })
+
+export const productUpdateStatusInActiveById = (id) =>
+  request({
+    url: '/product/update-status-in-active-by-id/' + id,
+    method: 'post'
+  })

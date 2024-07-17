@@ -1,6 +1,5 @@
 package com.vubq.joyboystore.repositories;
 
-import com.vubq.joyboystore.entities.Brand;
 import com.vubq.joyboystore.entities.Material;
 import com.vubq.joyboystore.enums.EStatus;
 import org.springframework.data.domain.Page;
@@ -24,4 +23,7 @@ public interface MaterialRepository extends JpaRepository<Material, String> {
     List<Material> getProductInStock(String productId, String materialId);
 
     List<Material> findAllByStatus(EStatus status);
+
+    @Query(value = "SELECT m FROM Material m WHERE m.id IN :idIn")
+    List<Material> getAllByIdIn(List<String> idIn);
 }
