@@ -16,5 +16,17 @@ public interface ProductService {
 
     Product getById(String id);
 
+    Page<Product> getAllPage(
+            DataTableRequest request,
+            String status,
+            String brandId,
+            String categoryId,
+            String sizeId,
+            String colorId,
+            String materialId,
+            Double minPrice,
+            Double maxPrice
+    );
+
     List<String> getAllProductIdInOfStock();
 }

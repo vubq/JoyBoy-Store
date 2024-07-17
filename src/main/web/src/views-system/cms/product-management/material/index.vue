@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div v-loading="listLoading" class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Chất liệu</h4>
@@ -136,7 +136,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="material.id && material.createdAt && material.createdBy" style="margin-bottom: 0;" >
+          <el-form-item v-if="material.id && material.createdAt && material.createdBy" style="margin-bottom: 0;">
             <span>Thời gian tạo: {{ moment(material.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ material.createdBy }})</span>
           </el-form-item>
 
@@ -181,13 +181,14 @@ export default {
         filter: '',
         sortBy: '',
         sortDesc: '',
-        status: Status.ACTIVE
+        status: Status.ALL
       },
       sortDefault: {
         prop: 'createdAt',
         order: 'descending'
       },
       listStatus: [
+        { value: Status.ALL, label: 'Chọn Trạng thái' },
         { value: Status.ACTIVE, label: 'Kinh doanh' },
         { value: Status.IN_ACTIVE, label: 'Ngừng kinh doanh' }
       ],

@@ -25,3 +25,9 @@ export const materialGetAllStatusActive = () =>
     url: '/material/get-all-status-active',
     method: 'get'
   })
+
+export const materialGetAll = () =>
+  request({
+    url: '/material/get-all',
+    method: 'get'
+  })

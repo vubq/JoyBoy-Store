@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
                         .operation(SearchOperation.EQUALITY)
                         .value(status)
                         .build());
-        return this.categoryRepository.findAll(Specification.where(specNameContains).and(specStatusEquality), pageable);
+        return this.categoryRepository.findAll(Specification.where(specNameContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class BrandServiceImpl implements BrandService {
                         .operation(SearchOperation.EQUALITY)
                         .value(status)
                         .build());
-        return this.brandRepository.findAll(Specification.where(specNameContains).and(specStatusEquality), pageable);
+        return this.brandRepository.findAll(Specification.where(specNameContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
     }
 
     @Override

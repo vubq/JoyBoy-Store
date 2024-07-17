@@ -22,4 +22,7 @@ public interface ColorRepository extends JpaRepository<Color, String> {
     List<Color> getProductInStock(String productId, String colorId);
 
     List<Color> findAllByStatus(EStatus status);
+
+    @Query(value = "SELECT c FROM Color c WHERE c.id IN :idIn")
+    List<Color> getAllByIdIn(List<String> idIn);
 }

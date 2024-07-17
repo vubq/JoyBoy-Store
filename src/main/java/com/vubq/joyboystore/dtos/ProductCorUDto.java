@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,4 +30,25 @@ public class ProductCorUDto {
     private String createdBy;
     private String updatedBy;
     private EStatus status;
+
+    public void addImageToList(ImageDto image) {
+        if (this.listImage == null) {
+            this.listImage = new ArrayList<>();
+        }
+        this.listImage.add(image);
+    }
+
+    public void addImageDeleteToList(ImageDto image) {
+        if (this.listImageDelete == null) {
+            this.listImageDelete = new ArrayList<>();
+        }
+        this.listImageDelete.add(image);
+    }
+
+    public void addProductDetailToList(ProductDetailCorUDto productDetail) {
+        if (this.listProductDetail == null) {
+            this.listProductDetail = new ArrayList<>();
+        }
+        this.listProductDetail.add(productDetail);
+    }
 }

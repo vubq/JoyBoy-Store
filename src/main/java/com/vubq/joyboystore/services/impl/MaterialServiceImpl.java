@@ -43,7 +43,7 @@ public class MaterialServiceImpl implements MaterialService {
                         .operation(SearchOperation.EQUALITY)
                         .value(status)
                         .build());
-        return this.materialRepository.findAll(Specification.where(specNameContains).and(specStatusEquality), pageable);
+        return this.materialRepository.findAll(Specification.where(specNameContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
     }
 
     @Override

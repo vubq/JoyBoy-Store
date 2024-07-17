@@ -25,3 +25,9 @@ export const sizeGetAllStatusActive = () =>
     url: '/size/get-all-status-active',
     method: 'get'
   })
+
+export const sizeGetAll = () =>
+  request({
+    url: '/size/get-all',
+    method: 'get'
+  })

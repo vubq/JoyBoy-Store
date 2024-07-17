@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductDetailServiceImpl implements ProductDetailService {
@@ -156,5 +155,58 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     public Integer getQuantityOfProductAvailable(String productId) {
         Integer quantity = this.productDetailRepository.getQuantityOfProductAvailable(productId);
         return quantity == null ? 0 : quantity;
+    }
+
+    @Override
+    public Page<ProductDetail> getAllPage(
+            DataTableRequest dataTableRequest,
+            String status,
+            String brandId,
+            String categoryId,
+            String sizeId,
+            String colorId,
+            String materialId,
+            Double minPrice,
+            Double maxPrice
+    ) {
+        PageRequest pageable = dataTableRequest.toPageable();
+        Specification specification = new Specification() {
+            @Override
+            public Predicate toPredicate(Root root, CriteriaQuery query, CriteriaBuilder criteriaBuilder) {
+                query.distinct(true);
+                query.groupBy(root.get("product"));
+                List<Predicate> predicates = new ArrayList<>();
+                Join<ProductDetail, Product> productDetailProductJoin = root.join("product");
+                Join<ProductDetail, Size> productDetailSizeJoin = root.join("size");
+                Join<ProductDetail, Color> productDetailColorJoin = root.join("color");
+                Join<ProductDetail, Material> productDetailMaterialJoin = root.join("material");
+                predicates.add(criteriaBuilder.like(criteriaBuilder.upper(productDetailProductJoin.get(Product.Fields.name)), "%" + dataTableRequest.getFilter().trim().toUpperCase() + "%"));
+                if (!status.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("product").get(Product.Fields.status), status)));
+                }
+                if (!categoryId.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(productDetailProductJoin.get("category").get(Category.Fields.id), categoryId)));
+                }
+                if (!brandId.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(productDetailProductJoin.get("brand").get(Brand.Fields.id), brandId)));
+                }
+                if (!sizeId.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(productDetailSizeJoin.get(Size.Fields.id), sizeId)));
+                }
+                if (!colorId.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(productDetailColorJoin.get(Color.Fields.id), colorId)));
+                }
+                if (!materialId.equals("ALL")) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.equal(productDetailMaterialJoin.get(Material.Fields.id), materialId)));
+                }
+//                if (priceApprox.size() == 2) {
+//                    predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(productDetailProductJoin.get("price"), priceApprox.get(0))));
+//                    predicates.add(criteriaBuilder.and(criteriaBuilder.lessThanOrEqualTo(productDetailProductJoin.get("price"), priceApprox.get(1))));
+//                }
+                query.where(predicates.toArray(new Predicate[]{}));
+                return null;
+            }
+        };
+        return this.productDetailRepository.findAll(specification, pageable);
     }
 }

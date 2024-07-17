@@ -27,7 +27,7 @@ public class BrandController extends BaseController {
         return DataTableResponse.build()
                 .ok()
                 .totalRows(result.getTotalElements())
-                .items(result.get().toList());
+                .items(result.getContent());
     }
 
     @GetMapping("{id}")
@@ -75,5 +75,10 @@ public class BrandController extends BaseController {
     @GetMapping("get-all-status-active")
     public Response getAllStatusActive() {
         return Response.build().ok().data(this.brandService.getAllStatusActive());
+    }
+
+    @GetMapping("get-all")
+    public Response getAll() {
+        return Response.build().ok().data(this.brandService.getAll());
     }
 }

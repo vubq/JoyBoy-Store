@@ -42,7 +42,7 @@ public class ColorServiceImpl implements ColorService {
                         .operation(SearchOperation.EQUALITY)
                         .value(status)
                         .build());
-        return this.colorRepository.findAll(Specification.where(specNameContains).and(specStatusEquality), pageable);
+        return this.colorRepository.findAll(Specification.where(specNameContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
     }
 
     @Override
@@ -68,5 +68,10 @@ public class ColorServiceImpl implements ColorService {
     @Override
     public List<Color> getAllStatusActive() {
         return this.colorRepository.findAllByStatus(EStatus.ACTIVE);
+    }
+
+    @Override
+    public List<Color> getAllByIdIn(List<String> idIn) {
+        return this.colorRepository.getAllByIdIn(idIn);
     }
 }

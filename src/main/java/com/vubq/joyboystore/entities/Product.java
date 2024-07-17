@@ -7,6 +7,7 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -55,4 +56,8 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private EStatus status;
+
+    @Transient
+    @OneToMany(mappedBy="products", fetch = FetchType.LAZY)
+    private List<ProductDetail> productDetails;
 }

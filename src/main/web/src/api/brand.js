@@ -25,3 +25,9 @@ export const brandGetAllStatusActive = () =>
     url: '/brand/get-all-status-active',
     method: 'get'
   })
+
+export const brandGetAll = () =>
+  request({
+    url: '/brand/get-all',
+    method: 'get'
+  })

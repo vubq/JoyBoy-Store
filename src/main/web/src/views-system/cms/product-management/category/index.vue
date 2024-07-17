@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div v-loading="listLoading" class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Danh mục</h4>
@@ -136,7 +136,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="category.id && category.createdAt && category.createdBy" style="margin-bottom: 0;" >
+          <el-form-item v-if="category.id && category.createdAt && category.createdBy" style="margin-bottom: 0;">
             <span>Thời gian tạo: {{ moment(category.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ category.createdBy }})</span>
           </el-form-item>
 
@@ -181,13 +181,14 @@ export default {
         filter: '',
         sortBy: '',
         sortDesc: '',
-        status: Status.ACTIVE
+        status: Status.ALL
       },
       sortDefault: {
         prop: 'createdAt',
         order: 'descending'
       },
       listStatus: [
+        { value: Status.ALL, label: 'Chọn Trạng thái' },
         { value: Status.ACTIVE, label: 'Kinh doanh' },
         { value: Status.IN_ACTIVE, label: 'Ngừng kinh doanh' }
       ],

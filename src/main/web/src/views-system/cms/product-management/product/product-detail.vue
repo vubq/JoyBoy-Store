@@ -1,14 +1,20 @@
 <template>
-  <div class="app-container">
+  <div v-loading="isLoading" class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Chi tiết Sản phẩm</h4>
-        <span style="font-size: 14px;">Thêm mới Sản phẩm</span>
+        <span style="font-size: 14px;">{{ product.id ? 'Cập nhật' : 'Thêm mới' }} Sản phẩm</span>
       </div>
 
-      <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="edit">
-        Thêm mới
-      </el-button>
+      <div>
+        <el-button v-if="product.id ? true : false" type="danger" icon="el-icon-delete" style="margin-left: 10px;" @click="edit">
+          Ngừng kinh doanh
+        </el-button>
+
+        <el-button type="primary" :icon="product.id ? 'el-icon-edit' : 'el-icon-circle-plus-outline'" style="margin-left: 10px;" @click="edit">
+          {{ product.id ? 'Cập nhật' : 'Thêm mới' }}
+        </el-button>
+      </div>
     </div>
 
     <div class="container-form-table" style="padding-top: 0; padding-bottom: 20px">
@@ -22,9 +28,11 @@
           <el-divider />
 
           <el-form
-            ref="dataForm"
+            ref="dataFormProduct"
             label-position="left"
             style="margin-top: 20px;"
+            :model="product"
+            :rules="rulesProduct"
           >
             <el-row :gutter="40">
               <el-col :span="8">
@@ -37,14 +45,14 @@
 
             <el-row :gutter="40">
               <el-col :span="8">
-                <el-form-item prop="name">
+                <el-form-item prop="price">
                   <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá tiền</div>
                   <el-input v-model="product.price" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="8">
-                <el-form-item prop="name">
+                <el-form-item prop="categoryId">
                   <div style="font-weight: bold;">
                     <div style="float: left;"><span style="color: red;">*</span>Danh mục</div>
                     <div style="float: right; color: #11A983;"><i class="el-icon-circle-plus-outline" />Thêm mới</div>
@@ -66,7 +74,7 @@
               </el-col>
 
               <el-col :span="8">
-                <el-form-item prop="name">
+                <el-form-item prop="brandId">
                   <div style="font-weight: bold;">
                     <div style="float: left;"><span style="color: red;">*</span>Thương hiệu</div>
                     <div style="float: right; color: #11A983;"><i class="el-icon-circle-plus-outline" />Thêm mới</div>
@@ -88,7 +96,7 @@
               </el-col>
             </el-row>
 
-            <el-form-item prop="name">
+            <el-form-item prop="description">
               <div style="font-weight: bold;">
                 <div style="float: left;"><span style="color: red;">*</span>Mô tả</div>
               </div>
@@ -98,10 +106,51 @@
           </el-form>
         </el-collapse-item>
 
+        <el-collapse-item name="image">
+          <template slot="title">
+            <i class="el-icon-info" />
+            <span style="font-size: 14px; font-weight: bold;"> Ảnh</span>
+          </template>
+
+          <el-divider />
+
+          <el-upload
+            ref="imagePUpload"
+            action="#"
+            list-type="picture-card"
+            style="margin-bottom: 20px; margin-top: 20px;"
+            :auto-upload="false"
+            :file-list="product.listImage"
+          >
+            <i slot="default" class="el-icon-plus" />
+            <div slot="file" slot-scope="{file}">
+              <img
+                class="el-upload-list__item-thumbnail"
+                :src="file.url"
+                alt=""
+              >
+              <span class="el-upload-list__item-actions">
+                <span
+                  class="el-upload-list__item-preview"
+                  @click="handlePictureCardPreview(file)"
+                >
+                  <i class="el-icon-zoom-in" />
+                </span>
+                <span
+                  class="el-upload-list__item-delete"
+                  @click="deletePImage(file, i)"
+                >
+                  <i class="el-icon-delete" />
+                </span>
+              </span>
+            </div>
+          </el-upload>
+        </el-collapse-item>
+
         <el-collapse-item name="variant" class="collapse-item-custom">
           <template slot="title">
             <i class="el-icon-info" />
-            <span style="font-size: 14px; font-weight: bold;"> Các loại thuộc tính</span>
+            <span style="font-size: 14px; font-weight: bold;"> Các loại biến thể Sản phẩm</span>
           </template>
 
           <el-divider />
@@ -132,6 +181,7 @@
                                 v-model="pd.sizeId"
                                 placeholder="Kích cỡ"
                                 style="margin-bottom: 10px;"
+                                :disabled="pd.id ? true : false"
                               >
                                 <el-option
                                   v-for="s in listSizeActive"
@@ -155,6 +205,7 @@
                                 v-model="pd.colorId"
                                 placeholder="Màu sắc"
                                 style="margin-bottom: 10px;"
+                                :disabled="pd.id ? true : false"
                               >
                                 <el-option
                                   v-for="c in listColorActive"
@@ -177,6 +228,7 @@
                               <el-select
                                 v-model="pd.materialId"
                                 placeholder="Chất liệu"
+                                :disabled="pd.id ? true : false"
                               >
                                 <el-option
                                   v-for="m in listMaterialActive"
@@ -252,7 +304,7 @@
               </el-form>
             </div>
 
-            <div style="position: absolute; top: 0; right: 0; bottom: 0">
+            <div v-if="!pd.id" style="position: absolute; top: 0; right: 0; bottom: 0">
               <el-button type="danger" icon="el-icon-delete" circle plain @click="deletePD(i)" />
             </div>
             <el-divider />
@@ -274,7 +326,7 @@ import { categoryGetAllStatusActive } from '@/api/category'
 import { colorGetAllStatusActive } from '@/api/color'
 import { sizeGetAllStatusActive } from '@/api/size'
 import { materialGetAllStatusActive } from '@/api/material'
-import { productCreateOrUpdate } from '@/api/product'
+import { productCreateOrUpdate, productGetById } from '@/api/product'
 import { ResponseCode } from '@/enums/enums'
 import axios from 'axios'
 
@@ -283,7 +335,9 @@ export default {
   components: { Tinymce },
   data() {
     return {
-      activeNames: ['product-information', 'variant'],
+      isLoading: false,
+      activeNames: ['product-information', 'variant', 'image'],
+      productId: '',
       product: {
         name: '',
         description: '',
@@ -303,6 +357,23 @@ export default {
       totalSizeCanCreate: 0,
       totalColorCanCreate: 0,
       totalMaterialCanCreate: 0,
+      rulesProduct: {
+        name: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        description: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        price: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        brandId: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        categoryId: [
+          { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ]
+      },
       rulesProductDetail: {
         sizeId: [
           { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
@@ -315,6 +386,9 @@ export default {
         ],
         quantity: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        price: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
         ]
       },
       listImageDelete: []
@@ -323,6 +397,8 @@ export default {
   watch: {
   },
   async created() {
+    this.productId = this.$route.query.id ? this.$route.query.id : ''
+    await this.getProductById()
     await brandGetAllStatusActive().then(res => {
       if (res && res.code === ResponseCode.CODE_SUCCESS) {
         this.listBrandActive = res.data
@@ -356,10 +432,20 @@ export default {
     this.calculateQuantity()
   },
   mounted() {
+    this.productId = this.$route.query.id ? this.$route.query.id : ''
   },
   destroyed() {
   },
   methods: {
+    getProductById() {
+      if (this.productId) {
+        productGetById(this.productId).then(res => {
+          if (res && res.code === ResponseCode.CODE_SUCCESS) {
+            this.product = res.data
+          }
+        })
+      }
+    },
     deletePDImage(file, i) {
       if (!file.raw) {
         this.product.listProductDetail[i].listImageDelete.push({
@@ -372,6 +458,18 @@ export default {
       }
       this.$refs.imagePDUpload[i].handleRemove(file)
     },
+    deletePImage(file) {
+      if (!file.raw) {
+        this.product.listImageDelete.push({
+          id: file.id,
+          publicId: file.publicId,
+          url: file.url,
+          type: file.type,
+          secondaryId: file.secondaryId
+        })
+      }
+      this.$refs.imagePUpload.handleRemove(file)
+    },
     calculateQuantity() {
       this.totalProductCanCreate = this.listColorActive.length * this.listMaterialActive.length * this.listSizeActive.length
       this.totalColorCanCreate = this.listMaterialActive.length * this.listSizeActive.length
@@ -379,22 +477,21 @@ export default {
       this.totalMaterialCanCreate = this.listColorActive.length * this.listSizeActive.length
     },
     hideProperties(properties, idProperties, pd) {
+      // if (this.product.listProductDetail && this.listColorActive && this.listMaterialActive && this.listSizeActive) {
+      //   return false
+      // }
       if (this.product.listProductDetail.length === this.listColorActive.length * this.listMaterialActive.length * this.listSizeActive.length) {
         return true
       }
-
       if (properties === 'size' && this.product.listProductDetail.find(e => e.sizeId === idProperties && e.colorId === pd.colorId && e.materialId === pd.materialId)) {
         return true
       }
-
       if (properties === 'color' && this.product.listProductDetail.find(e => e.colorId === idProperties && e.sizeId === pd.sizeId && e.materialId === pd.materialId)) {
         return true
       }
-
       if (properties === 'material' && this.product.listProductDetail.find(e => e.materialId === idProperties && e.colorId === pd.colorId && e.sizeId === pd.sizeId)) {
         return true
       }
-
       return false
     },
     addProductVariable() {
@@ -403,7 +500,7 @@ export default {
         sizeId: '',
         materialId: '',
         quantity: 0,
-        price: 0,
+        price: (this.product.price && this.product.price > 0) ? this.product.price : 0,
         listImage: [],
         listImageDelete: []
       })
@@ -412,42 +509,124 @@ export default {
       this.product.listProductDetail.splice(i, 1)
     },
     async edit() {
-      // eslint-disable-next-line no-unused-vars
-      var isValidate = true
-      // eslint-disable-next-line no-unused-vars
-      for (const [i, e] of this.product.listProductDetail.entries()) {
-        console.log(e)
-        this.$refs.dataFormPD[i].validate(valid => {
+      this.$confirm(this.product.id ? 'Bạn xác nhận cập nhật?' : 'Bạn xác nhận thêm mới?', this.product.id ? 'Xác nhận cập nhật' : 'Xác nhận thêm mới', {
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        type: 'warning'
+      }).then(async() => {
+        this.isLoading = true
+
+        if (this.$refs.imagePUpload.uploadFiles.length === 0) {
+          this.$message({
+            showClose: true,
+            message: 'Vui lòng thêm ít nhất 1 ảnh cho sản phẩm!',
+            type: 'error'
+          })
+          this.isLoading = false
+          return
+        }
+
+        if (this.product.listProductDetail.length === 0) {
+          this.$message({
+            showClose: true,
+            message: 'Vui lòng thêm ít nhất 1 biến thể cho sản phẩm!',
+            type: 'error'
+          })
+          this.isLoading = false
+          return
+        }
+
+        // eslint-disable-next-line no-unused-vars
+        var isValidate = true
+
+        this.$refs.dataFormProduct.validate(valid => {
           if (!valid) {
             isValidate = false
             return false
           }
         })
 
-        for (const image of this.$refs.imagePDUpload[i].uploadFiles) {
-          if (image.raw) {
-            const data = new FormData()
-            data.append('file', image.raw)
-            data.append('upload_preset', 'vubq-upload')
-            data.append('cloud_name', 'vubq')
-            await axios.post('https://api.cloudinary.com/v1_1/vubq/image/upload', data)
-              .then((res) => {
-                this.product.listProductDetail[i].listImage.push({
-                  publicId: res.data.public_id,
-                  url: res.data.url
+        if (isValidate) {
+          for (const image of this.$refs.imagePUpload.uploadFiles) {
+            if (image.raw) {
+              const data = new FormData()
+              data.append('file', image.raw)
+              data.append('upload_preset', 'vubq-upload')
+              data.append('cloud_name', 'vubq')
+              await axios.post('https://api.cloudinary.com/v1_1/vubq/image/upload', data)
+                .then((res) => {
+                  this.product.listImage.push({
+                    publicId: res.data.public_id,
+                    url: res.data.url
+                  })
                 })
-              })
-          } else {
-            this.product.listProductDetail[i].listImage.push(image)
+            }
           }
         }
-      }
 
-      if (isValidate) {
-        productCreateOrUpdate(this.product).then(res => {
-          console.log(res)
-        })
-      }
+        // eslint-disable-next-line no-unused-vars
+        for (const [i, e] of this.product.listProductDetail.entries()) {
+          this.$refs.dataFormPD[i].validate(valid => {
+            if (!valid) {
+              isValidate = false
+              return false
+            }
+          })
+
+          if (isValidate) {
+            for (const image of this.$refs.imagePDUpload[i].uploadFiles) {
+              if (image.raw) {
+                const data = new FormData()
+                data.append('file', image.raw)
+                data.append('upload_preset', 'vubq-upload')
+                data.append('cloud_name', 'vubq')
+                await axios.post('https://api.cloudinary.com/v1_1/vubq/image/upload', data)
+                  .then((res) => {
+                    this.product.listProductDetail[i].listImage.push({
+                      publicId: res.data.public_id,
+                      url: res.data.url
+                    })
+                  })
+              }
+            }
+          }
+        }
+
+        if (isValidate) {
+          productCreateOrUpdate(this.product).then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              if (this.product.id) {
+                this.$message({
+                  showClose: true,
+                  message: 'Cập nhật thành công!',
+                  type: 'success'
+                })
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: 'Thêm mới thành công!',
+                  type: 'success'
+                })
+              }
+
+              this.$router.push({
+                path: '/admin/product-management/product/detail',
+                query: {
+                  id: res.data.id
+                }
+              })
+            }
+          // eslint-disable-next-line no-return-assign
+          }).finally(() => this.isLoading = false)
+        } else {
+          this.$message({
+            showClose: true,
+            message: 'Vui lòng nhập đầy đủ thông tin!',
+            type: 'error'
+          })
+          this.isLoading = false
+        }
+      })
     }
   }
 }

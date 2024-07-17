@@ -42,7 +42,7 @@ public class SizeServiceImpl implements SizeService {
                         .operation(SearchOperation.EQUALITY)
                         .value(status)
                         .build());
-        return this.sizeRepository.findAll(Specification.where(specNameContains).and(specStatusEquality), pageable);
+        return this.sizeRepository.findAll(Specification.where(specNameContains).and(status.equals("ALL") ? null : specStatusEquality), pageable);
     }
 
     @Override

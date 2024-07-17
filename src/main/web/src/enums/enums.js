@@ -10,5 +10,6 @@ export const ResponseCode = {
 
 export const Status = {
   ACTIVE: 'ACTIVE',
-  IN_ACTIVE: 'IN_ACTIVE'
+  IN_ACTIVE: 'IN_ACTIVE',
+  ALL: 'ALL'
 }

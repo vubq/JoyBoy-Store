@@ -6,3 +6,16 @@ export const productCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const productGetById = (id) =>
+  request({
+    url: '/product/' + id,
+    method: 'get'
+  })
+
+export const productGetAllPage = (params) =>
+  request({
+    url: '/product/get-all-page',
+    method: 'get',
+    params
+  })

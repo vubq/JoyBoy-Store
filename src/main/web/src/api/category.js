@@ -25,3 +25,9 @@ export const categoryGetAllStatusActive = () =>
     url: '/category/get-all-status-active',
     method: 'get'
   })
+
+export const categoryGetAll = () =>
+  request({
+    url: '/category/get-all',
+    method: 'get'
+  })

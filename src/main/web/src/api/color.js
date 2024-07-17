@@ -25,3 +25,9 @@ export const colorGetAllStatusActive = () =>
     url: '/color/get-all-status-active',
     method: 'get'
   })
+
+export const colorGetAll = () =>
+  request({
+    url: '/color/get-all',
+    method: 'get'
+  })

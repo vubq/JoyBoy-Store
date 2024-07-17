@@ -6,7 +6,6 @@ import com.vubq.joyboystore.utils.DataTableRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ProductDetailService {
 
@@ -42,4 +41,16 @@ public interface ProductDetailService {
     List<ProductDetail> filterProductAttributes(FilterProductAttributeDTO filterProductAttributeDTO);
 
     ProductDetail getProductDetailByAttributes(String productId, String sizeId, String colorId, String materialId);
+
+    Page<ProductDetail> getAllPage(
+            DataTableRequest dataTableRequest,
+            String status,
+            String brandId,
+            String categoryId,
+            String sizeId,
+            String colorId,
+            String materialId,
+            Double minPrice,
+            Double maxPrice
+    );
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div v-loading="listLoading" class="app-container">
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Danh sách Sản phẩm</h4>
@@ -24,7 +24,7 @@
               <i slot="suffix" class="el-icon-search" style="cursor: pointer;" @click="getList()" />
             </el-input>
 
-            <el-select
+            <!-- <el-select
               v-model="listQuery.status"
               style="margin-left: 10px;"
               placeholder=""
@@ -36,7 +36,11 @@
                 :label="s.label"
                 :value="s.value"
               />
-            </el-select>
+            </el-select> -->
+
+            <el-button style="padding-left: 10px; padding-right: 10px; float: right;" @click="isBtnFilter = !isBtnFilter">
+              <i class="el-icon-more" />
+            </el-button>
 
             <!-- <el-button style="margin-left: 10px;" @click="getList()">
               Tìm kiếm
@@ -47,6 +51,110 @@
               Xuất excel
               <i class="el-icon-news" />
             </el-button> -->
+          </el-form-item>
+
+          <el-form-item v-if="isBtnFilter">
+            <el-select
+              v-model="listQuery.categoryId"
+              placeholder=""
+              style="width: 200px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="c in listCategory"
+                :key="c.id"
+                :label="c.name"
+                :value="c.id"
+              />
+            </el-select>
+
+            <el-select
+              v-model="listQuery.brandId"
+              placeholder=""
+              style="width: 200px; margin-left: 10px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="b in listBrand"
+                :key="b.id"
+                :label="b.name"
+                :value="b.id"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item v-if="isBtnFilter">
+            <el-select
+              v-model="listQuery.sizeId"
+              placeholder=""
+              style="width: 200px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="s in listSize"
+                :key="s.id"
+                :label="s.name"
+                :value="s.id"
+              />
+            </el-select>
+
+            <el-select
+              v-model="listQuery.colorId"
+              placeholder=""
+              style="width: 200px; margin-left: 10px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="c in listColor"
+                :key="c.id"
+                :label="c.name"
+                :value="c.id"
+              />
+            </el-select>
+
+            <el-select
+              v-model="listQuery.materialId"
+              placeholder=""
+              style="width: 200px; margin-left: 10px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="m in listMaterial"
+                :key="m.id"
+                :label="m.name"
+                :value="m.id"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item v-if="isBtnFilter">
+            <el-select
+              v-model="listQuery.status"
+              placeholder=""
+              style="width: 200px;"
+              @change="getList()"
+            >
+              <el-option
+                v-for="s in listStatus"
+                :key="s.value"
+                :label="s.label"
+                :value="s.value"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item v-if="isBtnFilter">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 430px;">
+              <el-input placeholder="Giá tiền" style="margin-right: 10px;" />
+              ~
+              <el-input placeholder="Giá tiền" style="margin-left: 10px;" />
+            </div>
+            <!-- <el-slider
+              style="margin: 0 10px 0 10px;"
+              range
+              :step="1000"
+              :max="500000"
+            /> -->
           </el-form-item>
         </el-form>
       </div>
@@ -102,75 +210,29 @@
       </el-table>
 
       <pagination v-show="total>0" :total="total" :page.sync="listQuery.currentPage" :limit.sync="listQuery.perPage" @pagination="getList" />
-
-      <el-dialog
-        width="30%"
-        :title="brand.id ? 'Chỉnh sửa' : 'Thêm mới'"
-        :visible.sync="dialogFormVisible"
-        :close-on-click-modal="false"
-        @closed="closeModal()"
-      >
-        <el-form
-          ref="dataForm"
-          :model="brand"
-          label-position="left"
-          :v-model="brand"
-          :rules="rules"
-        >
-          <el-form-item label="Tên" prop="name">
-            <el-input v-model="brand.name" />
-          </el-form-item>
-
-          <el-form-item label="Mô tả" prop="description">
-            <el-input v-model="brand.description" />
-          </el-form-item>
-
-          <el-form-item label="Trạng thái" prop="status">
-            <el-select v-model="brand.status" style="width: 100%;" placeholder="">
-              <el-option
-                v-for="s in listStatus"
-                :key="s.value"
-                :label="s.label"
-                :value="s.value"
-              />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item v-if="brand.id && brand.createdAt && brand.createdBy" style="margin-bottom: 0;" >
-            <span>Thời gian tạo: {{ moment(brand.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ brand.createdBy }})</span>
-          </el-form-item>
-
-          <el-form-item v-if="brand.id && brand.updatedAt && brand.updatedBy" style="margin-bottom: 0;">
-            <span>Thời gian cập nhật gần nhất: {{ moment(brand.updatedAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ brand.updatedBy }})</span>
-          </el-form-item>
-        </el-form>
-
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="closeModal()">
-            Hủy
-          </el-button>
-          <el-button type="primary" @click="edit()">
-            {{ brand.id ? 'Chỉnh sửa' : 'Thêm mới' }}
-          </el-button>
-        </div>
-      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
-import { brandGetAllPage, brandGetById, brandCreateOrUpdate } from '@/api/brand'
 import Pagination from '@/components/Pagination'
 import { ResponseCode, Status } from '@/enums/enums'
 import { parseTime } from '@/utils'
 import moment from 'moment'
+import { brandGetAll } from '@/api/brand'
+import { categoryGetAll } from '@/api/category'
+import { colorGetAll } from '@/api/color'
+import { sizeGetAll } from '@/api/size'
+import { materialGetAll } from '@/api/material'
+import { productGetAllPage } from '@/api/product'
 
 export default {
-  name: 'ProductManagementBrandPage',
+  name: 'ProductManagementProductListPage',
   components: { Pagination },
   data() {
     return {
       moment: moment,
+      isBtnFilter: false,
       tableKey: 0,
       list: null,
       total: 0,
@@ -181,19 +243,32 @@ export default {
         filter: '',
         sortBy: '',
         sortDesc: '',
-        status: Status.ACTIVE
+        status: Status.ALL,
+        categoryId: 'ALL',
+        brandId: 'ALL',
+        sizeId: 'ALL',
+        colorId: 'ALL',
+        materialId: 'ALL',
+        minPrice: 0,
+        maxPrice: 500000
       },
       sortDefault: {
         prop: 'createdAt',
         order: 'descending'
       },
+      listCategory: [],
+      listBrand: [],
+      listColor: [],
+      listSize: [],
+      listMaterial: [],
       listStatus: [
+        { value: Status.ALL, label: 'Chọn Trạng thái' },
         { value: Status.ACTIVE, label: 'Kinh doanh' },
         { value: Status.IN_ACTIVE, label: 'Ngừng kinh doanh' }
       ],
       dialogFormVisible: false,
       downloadLoading: false,
-      brand: {
+      product: {
         id: null,
         name: null,
         description: null,
@@ -221,6 +296,11 @@ export default {
   created() {
     this.listQuery.sortBy = this.sortDefault.prop
     this.listQuery.sortDesc = this.sortDefault.order === 'descending'
+    this.getAllListBrand()
+    this.getAllListCategory()
+    this.getAllListColor()
+    this.getAllListMaterial()
+    this.getAllListSize()
     this.getList()
   },
   mounted() {
@@ -228,9 +308,64 @@ export default {
   destroyed() {
   },
   methods: {
+    getAllListCategory() {
+      categoryGetAll().then(res => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.listCategory = res.data
+          this.listCategory.unshift({
+            id: 'ALL',
+            name: 'Chọn Danh mục'
+          })
+        }
+      })
+    },
+    getAllListBrand() {
+      brandGetAll().then(res => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.listBrand = res.data
+          this.listBrand.unshift({
+            id: 'ALL',
+            name: 'Chọn Thương hiệu'
+          })
+        }
+      })
+    },
+    getAllListSize() {
+      sizeGetAll().then(res => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.listSize = res.data
+          this.listSize.unshift({
+            id: 'ALL',
+            name: 'Chọn Kích cỡ'
+          })
+        }
+      })
+    },
+    getAllListColor() {
+      colorGetAll().then(res => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.listColor = res.data
+          this.listColor.unshift({
+            id: 'ALL',
+            name: 'Chọn Màu sắc'
+          })
+        }
+      })
+    },
+    getAllListMaterial() {
+      materialGetAll().then(res => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.listMaterial = res.data
+          this.listMaterial.unshift({
+            id: 'ALL',
+            name: 'Chọn Chất liệu'
+          })
+        }
+      })
+    },
     getList() {
       this.listLoading = true
-      brandGetAllPage(this.listQuery).then(res => {
+      productGetAllPage(this.listQuery).then(res => {
         setTimeout(() => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
             this.listLoading = false
@@ -244,94 +379,6 @@ export default {
       this.listQuery.sortBy = sortChange.prop
       this.listQuery.sortDesc = sortChange.order === 'descending'
       this.getList()
-    },
-    openModalEdit(id) {
-      brandGetById(id).then(res => {
-        this.dialogFormVisible = true
-        this.brand = res.data
-      })
-    },
-    closeModal() {
-      this.dialogFormVisible = false
-      this.$refs['dataForm'].clearValidate()
-      this.brand = {
-        id: null,
-        name: null,
-        description: null,
-        createdAt: null,
-        updatedAt: null,
-        createdBy: null,
-        updatedBy: null,
-        status: Status.ACTIVE
-      }
-    },
-    edit() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          if (this.brand.id) {
-            this.$confirm('Bạn xác nhận cập nhật?', 'Xác nhận cập nhật', {
-              confirmButtonText: 'Xác nhận',
-              cancelButtonText: 'Hủy',
-              type: 'warning'
-            }).then(() => {
-              brandCreateOrUpdate(this.brand).then(res => {
-                if (res && res.code === ResponseCode.CODE_SUCCESS) {
-                  this.$message({
-                    showClose: true,
-                    message: 'Cập nhật thành công!',
-                    type: 'success'
-                  })
-                  this.dialogFormVisible = false
-                  this.getList()
-                }
-              })
-            })
-          } else {
-            this.$confirm('Bạn xác nhận thêm mới?', 'Xác nhận thêm mới', {
-              confirmButtonText: 'Xác nhận',
-              cancelButtonText: 'Hủy',
-              type: 'warning'
-            }).then(() => {
-              brandCreateOrUpdate(this.brand).then(res => {
-                if (res && res.code === ResponseCode.CODE_SUCCESS) {
-                  this.$message({
-                    showClose: true,
-                    message: 'Thêm mới thành công!',
-                    type: 'success'
-                  })
-                  this.dialogFormVisible = false
-                  this.getList()
-                }
-              })
-            })
-          }
-        } else {
-          return false
-        }
-      })
-    },
-    openConfirmDelete(id) {
-      brandGetById(id).then(res1 => {
-        if (res1 && res1.code === ResponseCode.CODE_SUCCESS) {
-          this.$confirm('Chuyển trạng thái thành: "Ngừng kinh doanh", bạn chắc chắn chứ?', 'Xác nhận xóa', {
-            confirmButtonText: 'Xác nhận',
-            cancelButtonText: 'Hủy',
-            type: 'warning'
-          }).then(() => {
-            res1.data.status = Status.IN_ACTIVE
-            brandCreateOrUpdate(res1.data).then(res2 => {
-              if (res2 && res2.code === ResponseCode.CODE_SUCCESS) {
-                this.$message({
-                  showClose: true,
-                  message: 'Cập nhật thành công!',
-                  type: 'success'
-                })
-                this.getList()
-              }
-            })
-          })
-        }
-      })
     },
     exportFileExcel() {
       this.downloadLoading = true
