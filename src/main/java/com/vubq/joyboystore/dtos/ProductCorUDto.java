@@ -20,6 +20,7 @@ public class ProductCorUDto {
     private String name;
     private String description;
     private Double price;
+    private Double priceNet;
     private String categoryId;
     private String brandId;
     private List<ImageDto> listImage;

@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.services;
 
 import com.vubq.joyboystore.dtos.FilterProductAttributeDTO;
+import com.vubq.joyboystore.entities.Color;
 import com.vubq.joyboystore.entities.ProductDetail;
 import com.vubq.joyboystore.utils.DataTableRequest;
 import org.springframework.data.domain.Page;
@@ -53,4 +54,8 @@ public interface ProductDetailService {
             Double minPrice,
             Double maxPrice
     );
+
+    List<ProductDetail> getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(String searchBy);
+
+    List<ProductDetail> getAllByIdIn(List<String> idIn);
 }

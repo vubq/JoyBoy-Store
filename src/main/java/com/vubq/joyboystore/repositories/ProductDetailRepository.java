@@ -50,4 +50,14 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, St
             "AND pd.color.id = :colorId " +
             "AND pd.material.id = :materialId")
     ProductDetail getProductDetailByAttributes(String productId, String sizeId, String colorId, String materialId);
+
+    @Query(value = "SELECT pd FROM ProductDetail pd " +
+            "JOIN Product p " +
+            "ON p.id = pd.product.id " +
+            "WHERE pd.status = com.vubq.joyboystore.enums.EStatus.ACTIVE " +
+            "AND pd.quantity > 0 AND p.name LIKE %:searchBy%")
+    List<ProductDetail> getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(String searchBy);
+
+    @Query(value = "SELECT pd FROM ProductDetail pd WHERE pd.id IN :idIn")
+    List<ProductDetail> getAllByIdIn(List<String> idIn);
 }

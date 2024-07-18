@@ -33,6 +33,9 @@ public class Product {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "price_net")
+    private Double priceNet;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -56,8 +59,4 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private EStatus status;
-
-    @Transient
-    @OneToMany(mappedBy="products", fetch = FetchType.LAZY)
-    private List<ProductDetail> productDetails;
 }

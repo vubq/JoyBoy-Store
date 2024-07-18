@@ -18,6 +18,7 @@ public class ProductDetailCorUDto {
 
     private String id;
     private Double price;
+    private Double priceNet;
     private Integer quantity;
     private String productId;
     private String sizeId;

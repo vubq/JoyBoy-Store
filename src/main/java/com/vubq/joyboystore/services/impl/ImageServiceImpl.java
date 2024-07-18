@@ -39,4 +39,9 @@ public class ImageServiceImpl implements ImageService {
     public List<Image> findAllBySecondaryIdAndType(String secondaryId, EImageType type) {
         return this.imageRepository.findAllBySecondaryIdAndType(secondaryId, type);
     }
+
+    @Override
+    public List<String> getAllUrlBySecondaryId(String secondaryId) {
+        return this.imageRepository.getAllUrlBySecondaryId(secondaryId);
+    }
 }

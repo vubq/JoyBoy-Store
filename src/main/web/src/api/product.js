@@ -25,3 +25,10 @@ export const productUpdateStatusInActiveById = (id) =>
     url: '/product/update-status-in-active-by-id/' + id,
     method: 'post'
   })
+
+export const productGetAllBySalesAtTheCounter = (params) =>
+  request({
+    url: '/product/get-all-by-sales-at-the-counter',
+    method: 'get',
+    params
+  })

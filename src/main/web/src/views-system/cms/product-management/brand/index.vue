@@ -138,13 +138,13 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="brand.id && brand.createdAt && brand.createdBy" style="margin-bottom: 0;">
+          <!-- <el-form-item v-if="brand.id && brand.createdAt && brand.createdBy" style="margin-bottom: 0;">
             <span>Thời gian tạo: {{ moment(brand.createdAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ brand.createdBy }})</span>
           </el-form-item>
 
           <el-form-item v-if="brand.id && brand.updatedAt && brand.updatedBy" style="margin-bottom: 0;">
             <span>Thời gian cập nhật gần nhất: {{ moment(brand.updatedAt).format('HH:mm:ss DD-MM-YYYY') }} (bởi: {{ brand.updatedBy }})</span>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
 
         <div slot="footer" class="dialog-footer">

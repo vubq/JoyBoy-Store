@@ -2,6 +2,7 @@ package com.vubq.joyboystore.controllers;
 
 import com.vubq.joyboystore.dtos.VoucherDto;
 import com.vubq.joyboystore.entities.Voucher;
+import com.vubq.joyboystore.enums.EStatus;
 import com.vubq.joyboystore.services.VoucherService;
 import com.vubq.joyboystore.utils.DataTableRequest;
 import com.vubq.joyboystore.utils.DataTableResponse;
@@ -12,7 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -52,6 +55,35 @@ public class VoucherController extends BaseController {
                 .updatedBy(StringUtils.isEmpty(voucher.getUpdatedBy()) ? null : this.getUserNameByUserId(voucher.getUpdatedBy()))
                 .build();
         return Response.build().ok().data(dto);
+    }
+
+    @GetMapping("get-all-Like-code-and-still-active")
+    public Response getAllLikeCodeAndStillActive(@RequestParam(value = "code") String code) {
+        List<Voucher> listVoucher = this.voucherService.getAllLikeCodeAndStillActive(code, new Date(), EStatus.ACTIVE);
+        List<VoucherDto> listVoucherDto = new ArrayList<>();
+        listVoucher.forEach(v -> {
+            VoucherDto voucherDto = VoucherDto.builder()
+                    .id(v.getId())
+                    .code(v.getCode())
+                    .type(v.getType())
+                    .value(v.getValue())
+                    .quantity(v.getQuantity())
+                    .startDate(v.getStartDate())
+                    .endDate(v.getEndDate())
+                    .status(v.getStatus())
+                    .createdAt(v.getCreatedAt())
+                    .updatedAt(v.getUpdatedAt())
+                    .createdBy(StringUtils.isEmpty(v.getCreatedBy()) ? null : this.getUserNameByUserId(v.getCreatedBy()))
+                    .updatedBy(StringUtils.isEmpty(v.getUpdatedBy()) ? null : this.getUserNameByUserId(v.getUpdatedBy()))
+                    .build();
+            listVoucherDto.add(voucherDto);
+        });
+        return Response.build().ok().data(listVoucherDto);
+    }
+
+    @GetMapping("get-by-code/{code}")
+    public Response getByCode(@PathVariable String code) {
+        return Response.build().ok().data(this.voucherService.getByCode(code));
     }
 
     @PostMapping

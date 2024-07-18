@@ -16,4 +16,6 @@ public interface ImageService {
     List<Image> getAllBySecondaryId(String secondaryId);
 
     List<Image> findAllBySecondaryIdAndType(String secondaryId, EImageType type);
+
+    List<String> getAllUrlBySecondaryId(String secondaryId);
 }

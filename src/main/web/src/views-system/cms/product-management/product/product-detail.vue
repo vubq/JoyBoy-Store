@@ -46,11 +46,20 @@
             <el-row :gutter="40">
               <el-col :span="8">
                 <el-form-item prop="price">
-                  <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá tiền</div>
+                  <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá gốc</div>
                   <el-input v-model="product.price" />
                 </el-form-item>
               </el-col>
 
+              <el-col :span="8">
+                <el-form-item prop="priceNet">
+                  <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá giảm</div>
+                  <el-input v-model="product.priceNet" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="40">
               <el-col :span="8">
                 <el-form-item prop="categoryId">
                   <div style="font-weight: bold;">
@@ -247,8 +256,15 @@
                         <el-row :gutter="20">
                           <el-col :span="8">
                             <el-form-item prop="price">
-                              <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá tiền</div>
+                              <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá gốc</div>
                               <el-input v-model="pd.price" />
+                            </el-form-item>
+                          </el-col>
+
+                          <el-col :span="8">
+                            <el-form-item prop="price">
+                              <div style="float: left; font-weight: bold;"><span style="color: red;">*</span>Giá giảm</div>
+                              <el-input v-model="pd.priceNet" />
                             </el-form-item>
                           </el-col>
 
@@ -342,6 +358,7 @@ export default {
         name: '',
         description: '',
         price: 0,
+        priceNet: 0,
         brandId: '',
         categoryId: '',
         listProductDetail: [],
@@ -367,6 +384,9 @@ export default {
         price: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ],
+        priceNet: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
         brandId: [
           { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
         ],
@@ -388,6 +408,9 @@ export default {
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ],
         price: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        priceNet: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ]
       },
@@ -501,6 +524,7 @@ export default {
         materialId: '',
         quantity: 0,
         price: (this.product.price && this.product.price > 0) ? this.product.price : 0,
+        priceNet: (this.product.price && this.product.price > 0) ? this.product.price : 0,
         listImage: [],
         listImageDelete: []
       })

@@ -209,4 +209,14 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         };
         return this.productDetailRepository.findAll(specification, pageable);
     }
+
+    @Override
+    public List<ProductDetail> getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(String searchBy) {
+        return this.productDetailRepository.getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(searchBy);
+    }
+
+    @Override
+    public List<ProductDetail> getAllByIdIn(List<String> idIn) {
+        return this.productDetailRepository.getAllByIdIn(idIn);
+    }
 }

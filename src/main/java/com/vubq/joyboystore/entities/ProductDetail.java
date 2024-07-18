@@ -26,6 +26,9 @@ public class ProductDetail {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "price_net")
+    private Double priceNet;
+
     @Column(name = "quantity")
     private Integer quantity;
 

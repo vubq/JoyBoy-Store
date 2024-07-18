@@ -19,3 +19,16 @@ export const voucherCreateOrUpdate = (data) =>
     method: 'post',
     data
   })
+
+export const voucherGetAllLikeCodeAndStillActive = (params) =>
+  request({
+    url: '/voucher/get-all-Like-code-and-still-active',
+    method: 'get',
+    params
+  })
+
+export const voucherGetByCode = (code) =>
+  request({
+    url: '/voucher/get-by-code/' + code,
+    method: 'get'
+  })

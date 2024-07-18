@@ -1,9 +1,6 @@
 package com.vubq.joyboystore.controllers;
 
-import com.vubq.joyboystore.dtos.ImageDto;
-import com.vubq.joyboystore.dtos.ProductCorUDto;
-import com.vubq.joyboystore.dtos.ProductDetailCorUDto;
-import com.vubq.joyboystore.dtos.ProductViewDto;
+import com.vubq.joyboystore.dtos.*;
 import com.vubq.joyboystore.entities.*;
 import com.vubq.joyboystore.enums.EImageType;
 import com.vubq.joyboystore.enums.EStatus;
@@ -61,6 +58,7 @@ public class ProductController extends BaseController {
         Product productNew = Product.builder()
                 .name(dto.getName())
                 .price(dto.getPrice())
+                .priceNet(dto.getPriceNet())
                 .description(dto.getDescription())
                 .brand(this.brandService.getById(dto.getBrandId()))
                 .category(this.categoryService.getById((dto.getCategoryId())))
@@ -114,6 +112,7 @@ public class ProductController extends BaseController {
                         .color(this.colorService.getById(pd.getColorId()))
                         .material(this.materialService.getById(pd.getMaterialId()))
                         .price(pd.getPrice())
+                        .priceNet(pd.getPriceNet())
                         .quantity(pd.getQuantity())
                         .build();
                 if (StringUtils.isEmpty(pd.getId())) {
@@ -181,6 +180,7 @@ public class ProductController extends BaseController {
                 .brandId(product.getBrand().getId())
                 .categoryId(product.getCategory().getId())
                 .price(product.getPrice())
+                .priceNet(product.getPriceNet())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .createdBy(product.getCreatedBy())
@@ -204,6 +204,7 @@ public class ProductController extends BaseController {
             ProductDetailCorUDto productDetailCorUDto = ProductDetailCorUDto.builder()
                     .id(pd.getId())
                     .price(pd.getPrice())
+                    .priceNet(pd.getPriceNet())
                     .quantity(pd.getQuantity())
                     .productId(pd.getProduct().getId())
                     .colorId(pd.getColor().getId())
@@ -316,5 +317,62 @@ public class ProductController extends BaseController {
         product.setStatus(EStatus.IN_ACTIVE);
         this.productService.save(product);
         return Response.build().ok();
+    }
+
+    @GetMapping("get-all-by-sales-at-the-counter")
+    public Response getAllBySalesAtTheCounter(@RequestParam String searchBy) {
+        List<ProductDetail> listProductDetail = this.productDetailService.getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(searchBy);
+        List<ProductDetailSATCDto> listProductDetailSATC = new ArrayList<>();
+        listProductDetail.forEach(pd -> {
+            ProductDetailSATCDto productDetailSATC = ProductDetailSATCDto.builder()
+                    .id(pd.getId())
+                    .price(pd.getPrice())
+                    .priceNet(pd.getPriceNet())
+                    .quantity(pd.getQuantity())
+                    .product(
+                            ProductSATCDto.builder()
+                                    .id(pd.getProduct().getId())
+                                    .name(pd.getProduct().getName())
+                                    .price(pd.getProduct().getPrice())
+                                    .priceNet(pd.getPriceNet())
+                                    .description(pd.getProduct().getDescription())
+                                    .category(
+                                            CategoryDto.builder()
+                                                    .id(pd.getProduct().getCategory().getId())
+                                                    .name(pd.getProduct().getCategory().getName())
+                                                    .build()
+                                    )
+                                    .brand(
+                                            BrandDto.builder()
+                                                    .id(pd.getProduct().getBrand().getId())
+                                                    .name(pd.getProduct().getBrand().getName())
+                                                    .build()
+                                    )
+                                    .listImage(this.imageService.getAllUrlBySecondaryId(pd.getProduct().getId()))
+                                    .build()
+                    )
+                    .size(
+                            SizeDto.builder()
+                                    .id(pd.getSize().getId())
+                                    .name(pd.getSize().getName())
+                                    .build()
+                    )
+                    .color(
+                            ColorDto.builder()
+                                    .id(pd.getColor().getId())
+                                    .name(pd.getColor().getName())
+                                    .build()
+                    )
+                    .material(
+                            MaterialDto.builder()
+                                    .id(pd.getMaterial().getId())
+                                    .name(pd.getMaterial().getName())
+                                    .build()
+                    )
+                    .listImage(this.imageService.getAllUrlBySecondaryId(pd.getProduct().getId()))
+                    .build();
+            listProductDetailSATC.add(productDetailSATC);
+        });
+        return Response.build().ok().data(listProductDetailSATC);
     }
 }
