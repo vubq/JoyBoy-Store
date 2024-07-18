@@ -6,7 +6,7 @@
     <div class="container-form-header">
       <div>
         <h4 style="margin-block-end: 5px; margin-block-start: 0;">Bán hàng tại quầy</h4>
-        <span style="font-size: 14px;">Quản lý hóa đơn treo</span>
+        <span style="font-size: 14px;">Hóa đơn</span>
       </div>
 
       <el-button type="primary" icon="el-icon-circle-plus-outline" style="margin-left: 10px;" @click="addOrder(orderId)">
@@ -87,9 +87,9 @@
                         </template>
                       </el-table-column>
 
-                      <el-table-column label="Đơn giá" prop="productDetailPrice" align="center">
+                      <el-table-column label="Đơn giá" prop="productDetailPriceNet" align="center">
                         <template slot-scope="{row}">
-                          {{ formatCurrencyVND(row.productDetailPrice) }}
+                          {{ formatCurrencyVND(row.productDetailPriceNet) }} <span v-if="row.productDetailPrice > row.productDetailPriceNet" style="text-decoration: line-through;">({{ formatCurrencyVND(row.productDetailPrice) }})</span>
                         </template>
                       </el-table-column>
 
@@ -100,20 +100,21 @@
                               plain
                               type="info"
                               style="padding-left: 4px; padding-right: 4px;"
-                              @click="--row.quantity"
+                              @click="--row.quantity, calculatedTotalMoney(i)"
                             >
                               <i class="el-icon-minus" />
                             </el-button>
                             <el-input
                               v-model="row.quantity"
                               style="text-align: center !important; margin-left: 4px; margin-right: 4px;"
-                              class="input-text-align-center"
+                              class="input-text-align-center input-quantity"
+                              @change="calculatedTotalMoney(i)"
                             />
                             <el-button
                               plain
                               type="info"
                               style="padding-left: 4px; padding-right: 4px;"
-                              @click="++row.quantity"
+                              @click="++row.quantity, calculatedTotalMoney(i)"
                             >
                               <i class="el-icon-plus" />
                             </el-button>
@@ -121,21 +122,15 @@
                         </template>
                       </el-table-column>
 
-                      <el-table-column fixed="right" label="Tổng tiền gốc" prop="totalAmount" align="center">
+                      <el-table-column fixed="right" label="Tổng tiền" prop="totalAmountNet" align="center">
                         <template slot-scope="{row}">
-                          {{ formatCurrencyVND(row.totalAmount) }}
-                        </template>
-                      </el-table-column>
-
-                      <el-table-column fixed="right" label="Tổng tiền giảm giá" prop="totalAmountNet" align="center">
-                        <template slot-scope="{row}">
-                          {{ formatCurrencyVND(row.totalAmountNet) }}
+                          {{ formatCurrencyVND(row.totalAmountNet) }} <span v-if="row.totalAmount > row.totalAmountNet" style="text-decoration: line-through;">({{ formatCurrencyVND(row.totalAmount) }})</span>
                         </template>
                       </el-table-column>
 
                       <el-table-column fixed="right" label="" align="center" width="80">
                         <template slot-scope="scope">
-                          <el-button type="danger" size="small" plain @click="listOrder[i].listOrderDetail.splice(scope.$index, 1)">
+                          <el-button type="danger" size="small" plain @click="listOrder[i].listOrderDetail.splice(scope.$index, 1), calculatedTotalMoney(i)">
                             <i class="el-icon-delete" />
                           </el-button>
                         </template>
@@ -200,15 +195,23 @@
 
               <el-form-item>
                 <div>
-                  <label>Tổng tiền ({{ totalProductDetail() }} sản phẩm)</label>
+                  <label>Tổng tiền ({{ totalProductDetail() }} sản phẩm):</label>
 
                   <span style="float: right;">{{ formatCurrencyVND(listOrder[indexOrder()].totalAmount) }}</span>
                 </div>
               </el-form-item>
 
+              <el-form-item v-if="listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + ((od.quantity * od.productDetailPrice) - (od.quantity * od.productDetailPriceNet)), 0) > 0">
+                <div>
+                  <label>Giảm giá:</label>
+
+                  <span style="float: right;">-{{ formatCurrencyVND(listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + ((od.quantity * od.productDetailPrice) - (od.quantity * od.productDetailPriceNet)), 0)) }}</span>
+                </div>
+              </el-form-item>
+
               <el-form-item>
                 <div>
-                  <el-checkbox v-model="listOrder[indexOrder()].isVoucher">
+                  <el-checkbox v-model="listOrder[indexOrder()].isVoucher" @change="calculatedTotalMoney(indexOrder())">
                     <template #default>
                       <span style="font-weight: bold;">Mã giảm giá</span>
                     </template>
@@ -235,6 +238,20 @@
                       <i slot="suffix" class="el-icon-s-promotion" />
                     </el-input> -->
                   </div>
+                </div>
+              </el-form-item>
+
+              <el-form-item v-if="listOrder[indexOrder()].isVoucher && listOrder[indexOrder()].voucher && listOrder[indexOrder()].voucherCode">
+                <div>
+                  <label>Giảm giá (Mã giảm giá):</label>
+
+                  <span v-if="listOrder[indexOrder()].voucher.type === VoucherType.MONEY" style="float: right;">
+                    -{{ formatCurrencyVND(listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + (od.quantity * od.productDetailPriceNet), 0) - listOrder[indexOrder()].voucher.value) }}
+                  </span>
+
+                  <span v-else style="float: right;">
+                    -{{ formatCurrencyVND((listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + (od.quantity * od.productDetailPriceNet), 0) * listOrder[indexOrder()].voucher.value / 100) > listOrder[indexOrder()].voucher.max ? listOrder[indexOrder()].voucher.max : listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + (od.quantity * od.productDetailPriceNet), 0) * listOrder[indexOrder()].voucher.value / 100) }}
+                  </span>
                 </div>
               </el-form-item>
 
@@ -267,6 +284,7 @@ export default {
     return {
       tableKey: 0,
       moment: moment,
+      VoucherType: VoucherType,
       formatCurrencyVND: formatCurrencyVND,
       listLoading: true,
       orderId: '1',
@@ -303,71 +321,12 @@ export default {
       searchProductDetail: ''
     }
   },
-  watch: {
-    listOrder: {
-      deep: true,
-      handler(newItems, oldItems) {
-        for (let i = 0; i < this.listOrder.length; i++) {
-          let totalAmountP = 0
-          let totalAmountPNet = 0
-          let totalDiscountMoney = 0
-          let discountMoney = 0
-
-          if (!this.listOrder[i].isVoucher) {
-            this.listOrder[i].voucher = null
-            this.listOrder[i].voucherCode = ''
-          }
-
-          if (this.listOrder[i].isVoucher && this.listOrder[i].voucherCode) {
-            voucherGetByCode(this.listOrder[i].voucherCode)
-              .then(res => {
-                if (res && res.code === ResponseCode.CODE_SUCCESS && res.data) {
-                  this.listOrder[i].voucher = res.data
-                }
-              })
-          }
-
-          if (this.listOrder[i].voucher && this.listOrder[i].voucher.type === VoucherType.MONEY) {
-            totalDiscountMoney = this.listOrder[i].voucher.value
-            discountMoney = this.listOrder[i].voucher.value / this.listOrder[i].listOrderDetail.length
-          }
-
-          if (this.listOrder[i].voucher && this.listOrder[i].voucher.type === VoucherType.PERCENT) {
-            totalDiscountMoney = this.listOrder[i].voucher.value * this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPrice)), 0) / 100
-            discountMoney = totalDiscountMoney / this.listOrder[i].listOrderDetail.length
-          }
-
-          for (let j = 0; j < this.listOrder[i].listOrderDetail.length; j++) {
-            const totalAmountOD = this.listOrder[i].listOrderDetail[j].productDetailPrice * this.listOrder[i].listOrderDetail[j].quantity
-            let totalAmountODNet = 0
-            if (this.listOrder[i].isVoucher && this.listOrder[i].voucherCode && this.listOrder[i].voucher) {
-              if (j === this.listOrder[i].listOrderDetail.length - 1) {
-                totalAmountODNet = totalAmountP + totalAmountOD - totalDiscountMoney - totalAmountPNet
-              } else {
-                totalAmountODNet = Math.floor((this.listOrder[i].listOrderDetail[j].productDetailPrice * this.listOrder[i].listOrderDetail[j].quantity) - discountMoney)
-              }
-            } else {
-              totalAmountODNet = this.listOrder[i].listOrderDetail[j].productDetailPrice * this.listOrder[i].listOrderDetail[j].quantity
-            }
-            this.listOrder[i].listOrderDetail[j].totalAmount = isNaN(totalAmountOD) ? 0 : totalAmountOD
-            this.listOrder[i].listOrderDetail[j].totalAmountNet = isNaN(totalAmountODNet) ? 0 : totalAmountODNet
-            totalAmountP += totalAmountOD
-            totalAmountPNet += totalAmountODNet
-          }
-
-          this.listOrder[i].totalAmount = totalAmountP
-          this.listOrder[i].totalAmountNet = totalAmountPNet
-        }
-      }
-    }
-  },
+  watch: {},
   created() {
     // console.log(this.listOrder.findIndex(o => o.id === this.orderId))
   },
-  mounted() {
-  },
-  destroyed() {
-  },
+  mounted() {},
+  destroyed() {},
   methods: {
     addOrder(o) {
       // eslint-disable-next-line prefer-const
@@ -381,8 +340,8 @@ export default {
         city: '',
         district: '',
         ward: '',
-        totalAmount: '',
-        totalAmountNet: '',
+        totalAmount: 0,
+        totalAmountNet: 0,
         voucherId: '',
         noteByCustomer: '',
         noteByAdmin: '',
@@ -441,9 +400,10 @@ export default {
         orderId: null,
         productDetail: item,
         productDetailId: item.id,
-        productDetailPrice: item.priceNet,
+        productDetailPrice: item.price,
+        productDetailPriceNet: item.priceNet,
         quantity: 1,
-        totalAmount: item.priceNet * 1,
+        totalAmount: item.price * 1,
         totalAmountNet: item.priceNet * 1,
         createdAt: '',
         updatedAt: '',
@@ -451,9 +411,12 @@ export default {
         updatedBy: '',
         status: Status.ACTIVE
       })
+
+      this.calculatedTotalMoney(i)
     },
     selectVoucher(item) {
       this.listOrder[this.indexOrder()].voucherCode = item.code
+      this.calculatedTotalMoney(this.indexOrder())
     },
     loadListVoucher(code, cb) {
       voucherGetAllLikeCodeAndStillActive({
@@ -483,6 +446,62 @@ export default {
           }
         }
       })
+    },
+    async calculatedTotalMoney(i) {
+      let totalAmountP = 0
+      let totalAmountPNet = 0
+      let totalDiscountMoney = 0
+      let discountMoney = 0
+      let totalPriceDifference = 0
+
+      if (!this.listOrder[i].isVoucher) {
+        this.listOrder[i].voucher = null
+        this.listOrder[i].voucherCode = ''
+      }
+
+      if (this.listOrder[i].isVoucher && this.listOrder[i].voucherCode) {
+        await voucherGetByCode(this.listOrder[i].voucherCode)
+          .then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS && res.data) {
+              this.listOrder[i].voucher = res.data
+            }
+          })
+      }
+
+      if (this.listOrder[i].voucher && this.listOrder[i].voucher.type === VoucherType.MONEY) {
+        totalDiscountMoney = this.listOrder[i].voucher.value
+        discountMoney = this.listOrder[i].voucher.value / this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + Number(od.quantity), 0)
+      }
+
+      if (this.listOrder[i].voucher && this.listOrder[i].voucher.type === VoucherType.PERCENT) {
+        totalDiscountMoney = this.listOrder[i].voucher.value * this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) / 100
+        if (totalDiscountMoney > this.listOrder[i].voucher.max) {
+          totalDiscountMoney = this.listOrder[i].voucher.max
+        }
+        discountMoney = totalDiscountMoney / this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + Number(od.quantity), 0)
+      }
+
+      for (let j = 0; j < this.listOrder[i].listOrderDetail.length; j++) {
+        totalPriceDifference += (this.listOrder[i].listOrderDetail[j].productDetailPrice - this.listOrder[i].listOrderDetail[j].productDetailPriceNet) * this.listOrder[i].listOrderDetail[j].quantity
+        const totalAmountOD = this.listOrder[i].listOrderDetail[j].productDetailPrice * this.listOrder[i].listOrderDetail[j].quantity
+        let totalAmountODNet = 0
+        if (this.listOrder[i].isVoucher && this.listOrder[i].voucherCode && this.listOrder[i].voucher) {
+          if (j === this.listOrder[i].listOrderDetail.length - 1) {
+            totalAmountODNet = totalAmountP + totalAmountOD - totalPriceDifference - totalDiscountMoney - totalAmountPNet
+          } else {
+            totalAmountODNet = Math.floor((this.listOrder[i].listOrderDetail[j].productDetailPriceNet * this.listOrder[i].listOrderDetail[j].quantity) - (this.listOrder[i].listOrderDetail[j].quantity > 1 ? (discountMoney * this.listOrder[i].listOrderDetail[j].quantity) : discountMoney))
+          }
+        } else {
+          totalAmountODNet = this.listOrder[i].listOrderDetail[j].productDetailPriceNet * this.listOrder[i].listOrderDetail[j].quantity
+        }
+        this.listOrder[i].listOrderDetail[j].totalAmount = isNaN(totalAmountOD) ? 0 : totalAmountOD
+        this.listOrder[i].listOrderDetail[j].totalAmountNet = isNaN(totalAmountODNet) ? 0 : totalAmountODNet
+        totalAmountP += totalAmountOD
+        totalAmountPNet += totalAmountODNet
+      }
+
+      this.listOrder[i].totalAmount = totalAmountP
+      this.listOrder[i].totalAmountNet = totalAmountPNet
     }
   }
 }
@@ -510,6 +529,12 @@ export default {
 ::v-deep .input-text-align-center {
   input {
     text-align: center !important;
+  }
+}
+
+::v-deep .input-quantity {
+  input {
+    padding-left: 1px; padding-right: 1px;
   }
 }
 </style>

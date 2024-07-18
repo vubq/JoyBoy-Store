@@ -81,10 +81,10 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Giá trị" prop="value" sortable="custom" align="center" width="150">
+        <el-table-column label="Giá trị" prop="value" sortable="custom" align="center" width="200">
           <template slot-scope="{row}">
             <span v-if="row.type === VoucherType.PERCENT">
-              {{ row.value }}%
+              {{ row.value }}% (Tối đa: {{ formatCurrencyVND(row.max) }})
             </span>
             <span v-if="row.type === VoucherType.MONEY">
               {{ formatCurrencyVND(row.value) }}
@@ -170,6 +170,10 @@
             <el-input v-model="voucher.value" />
           </el-form-item>
 
+          <el-form-item v-if="voucher.type === VoucherType.PERCENT" label="Tối đa" prop="value">
+            <el-input v-model="voucher.max" />
+          </el-form-item>
+
           <el-form-item label="Số lượng" prop="quantity">
             <el-input v-model="voucher.quantity" />
           </el-form-item>
@@ -230,7 +234,7 @@ import { voucherGetAllPage, voucherGetById, voucherCreateOrUpdate } from '@/api/
 import Pagination from '@/components/Pagination'
 import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { parseTime } from '@/utils'
-import { formatCurrencyVND } from '@/utils/format.js'
+import { formatCurrencyVND } from '@/utils/format'
 import moment from 'moment'
 
 export default {
@@ -276,6 +280,7 @@ export default {
         type: VoucherType.MONEY,
         value: 0,
         quantity: 0,
+        max: 0,
         startDate: null,
         endDate: null,
         createdAt: null,
@@ -349,6 +354,7 @@ export default {
         type: VoucherType.MONEY,
         value: 0,
         quantity: 0,
+        max: 0,
         startDate: null,
         endDate: null,
         createdAt: null,

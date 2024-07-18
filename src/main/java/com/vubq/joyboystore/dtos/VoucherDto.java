@@ -24,6 +24,7 @@ public class VoucherDto {
     private String code;
     private EVoucherType type;
     private Double value;
+    private Double max;
     private Integer quantity;
     private Date startDate;
     private Date endDate;

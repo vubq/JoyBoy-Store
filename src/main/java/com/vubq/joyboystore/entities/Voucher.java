@@ -34,6 +34,9 @@ public class Voucher {
     @Column(name = "value")
     private Double value;
 
+    @Column(name = "max")
+    private Double max;
+
     @Column(name = "quantity")
     private Integer quantity;
 

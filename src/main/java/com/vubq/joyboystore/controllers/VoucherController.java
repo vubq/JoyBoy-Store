@@ -45,6 +45,7 @@ public class VoucherController extends BaseController {
                 .code(voucher.getCode())
                 .type(voucher.getType())
                 .value(voucher.getValue())
+                .max(voucher.getMax())
                 .quantity(voucher.getQuantity())
                 .startDate(voucher.getStartDate())
                 .endDate(voucher.getEndDate())
@@ -67,6 +68,7 @@ public class VoucherController extends BaseController {
                     .code(v.getCode())
                     .type(v.getType())
                     .value(v.getValue())
+                    .max(v.getMax())
                     .quantity(v.getQuantity())
                     .startDate(v.getStartDate())
                     .endDate(v.getEndDate())
@@ -95,6 +97,7 @@ public class VoucherController extends BaseController {
                     .code(generateDiscountCode(prefixes[RANDOM.nextInt(prefixes.length)]))
                     .type(dto.getType())
                     .value(dto.getValue())
+                    .max(dto.getMax())
                     .quantity(dto.getQuantity())
                     .startDate(dto.getStartDate())
                     .endDate(dto.getEndDate())
@@ -109,6 +112,7 @@ public class VoucherController extends BaseController {
             }
             voucher.setType(dto.getType());
             voucher.setValue(dto.getValue());
+            voucher.setMax(dto.getMax());
             voucher.setQuantity(dto.getQuantity());
             voucher.setStartDate(dto.getStartDate());
             voucher.setEndDate(dto.getEndDate());

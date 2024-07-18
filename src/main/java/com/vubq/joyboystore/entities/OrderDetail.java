@@ -34,6 +34,9 @@ public class OrderDetail {
     @Column(name = "product_detail_price")
     private Double productDetailPrice;
 
+    @Column(name = "product_detail_price_net")
+    private Double productDetailPriceNet;
+
     @Column(name = "quantity")
     private Integer quantity;
 

@@ -524,7 +524,7 @@ export default {
         materialId: '',
         quantity: 0,
         price: (this.product.price && this.product.price > 0) ? this.product.price : 0,
-        priceNet: (this.product.price && this.product.price > 0) ? this.product.price : 0,
+        priceNet: (this.product.price && this.product.priceNet > 0) ? this.product.priceNet : 0,
         listImage: [],
         listImageDelete: []
       })
