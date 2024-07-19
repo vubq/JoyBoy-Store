@@ -3,6 +3,7 @@ package com.vubq.joyboystore.entities;
 import com.vubq.joyboystore.enums.EOrderStatus;
 import com.vubq.joyboystore.enums.EOrderType;
 import com.vubq.joyboystore.enums.EPaymentType;
+import com.vubq.joyboystore.enums.EPaymentType2;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
@@ -52,6 +53,12 @@ public class Order {
     @Column(name = "total_amount_net")
     private Double totalAmountNet;
 
+    @Column(name = "money_paid")
+    private Double moneyPaid;
+
+    @Column(name = "money_refunds")
+    private Double moneyRefunds;
+
     @Column(name = "voucher_id")
     private String voucherId;
 
@@ -83,6 +90,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_type")
     private EPaymentType paymentType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type_2")
+    private EPaymentType2 paymentType2;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

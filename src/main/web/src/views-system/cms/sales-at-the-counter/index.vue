@@ -60,7 +60,7 @@
                               <span>Thuộc tính: {{ item.size.name }} - {{ item.color.name }} - {{ item.material.name }}</span>
                             </div>
                             <div style="width: 100%;">
-                              <span style="color: red;">Giá: {{ formatCurrencyVND(item.priceNet) }} <span style="text-decoration: line-through;">({{ formatCurrencyVND(item.price) }})</span></span>
+                              <span>Giá: {{ formatCurrencyVND(item.priceNet) }} <span v-if="item.price > item.priceNet" style="text-decoration: line-through;">({{ formatCurrencyVND(item.price) }})</span></span>
                             </div>
                           </div>
                         </div>
@@ -94,31 +94,39 @@
                       </el-table-column>
 
                       <el-table-column fixed="right" label="Số lượng" prop="quantity" align="center">
-                        <template slot-scope="{row}">
-                          <div style="display: flex;">
-                            <el-button
-                              plain
-                              type="info"
-                              style="padding-left: 4px; padding-right: 4px;"
-                              @click="--row.quantity, calculatedTotalMoney(i)"
-                            >
-                              <i class="el-icon-minus" />
-                            </el-button>
-                            <el-input
-                              v-model="row.quantity"
-                              style="text-align: center !important; margin-left: 4px; margin-right: 4px;"
-                              class="input-text-align-center input-quantity"
-                              @change="calculatedTotalMoney(i)"
-                            />
-                            <el-button
-                              plain
-                              type="info"
-                              style="padding-left: 4px; padding-right: 4px;"
-                              @click="++row.quantity, calculatedTotalMoney(i)"
-                            >
-                              <i class="el-icon-plus" />
-                            </el-button>
-                          </div>
+                        <template slot-scope="scope">
+                          <el-form
+                            ref="dataFormQuantity"
+                            :model="listOrder[indexOrder()].listOrderDetail[scope.$index]"
+                            :rules="rulesFormQuantity"
+                          >
+                            <el-form-item prop="quantity">
+                              <div style="display: flex;">
+                                <el-button
+                                  plain
+                                  type="info"
+                                  style="padding-left: 4px; padding-right: 4px;"
+                                  @click="reduceQuantity(i, scope.$index), calculatedTotalMoney(i)"
+                                >
+                                  <i class="el-icon-minus" />
+                                </el-button>
+                                <el-input
+                                  v-model="scope.row.quantity"
+                                  style="text-align: center !important; margin-left: 4px; margin-right: 4px;"
+                                  class="input-text-align-center input-quantity"
+                                  @change="calculatedTotalMoney(i)"
+                                />
+                                <el-button
+                                  plain
+                                  type="info"
+                                  style="padding-left: 4px; padding-right: 4px;"
+                                  @click="increaseQuantity(i, scope.$index), calculatedTotalMoney(i)"
+                                >
+                                  <i class="el-icon-plus" />
+                                </el-button>
+                              </div>
+                            </el-form-item>
+                          </el-form>
                         </template>
                       </el-table-column>
 
@@ -149,8 +157,13 @@
           <div>
             <span style="font-size: 14px; font-weight: bold;">Thông tin Khách hàng</span>
 
-            <el-form style="margin-top: 10px;" @submit.native.prevent>
-              <el-form-item>
+            <el-form
+              ref="dataFormInformation"
+              :model="listOrder[indexOrder()]"
+              :rules="rulesFormInformation"
+              style="margin-top: 10px;"
+            >
+              <el-form-item prop="fullName">
                 <el-input
                   v-model="listOrder[indexOrder()].fullName"
                   placeholder="Tên Khách hàng"
@@ -161,7 +174,7 @@
                 </el-input>
               </el-form-item>
 
-              <el-form-item>
+              <el-form-item prop="phoneNumber">
                 <el-input
                   v-model="listOrder[indexOrder()].phoneNumber"
                   placeholder="SĐT Khách hàng"
@@ -172,7 +185,7 @@
                 </el-input>
               </el-form-item>
 
-              <el-form-item>
+              <el-form-item prop="address">
                 <el-input
                   v-model="listOrder[indexOrder()].address"
                   placeholder="Địa chỉ Khách hàng"
@@ -188,7 +201,11 @@
 
         <div class="container-form-table">
           <div>
-            <el-form @submit.native.prevent>
+            <el-form
+              ref="dataFormPay"
+              :model="listOrder[indexOrder()]"
+              :rules="rulesFormPay"
+            >
               <el-form-item>
                 <label>Thông tin thanh toán</label>
               </el-form-item>
@@ -227,6 +244,7 @@
                       :fetch-suggestions="loadListVoucher"
                       :trigger-on-focus="true"
                       @select="selectVoucher"
+                      @change="calculatedTotalMoney(indexOrder())"
                     >
                       <i slot="suffix" class="el-icon-s-promotion" />
                       <template slot-scope="{ item }">
@@ -246,7 +264,7 @@
                   <label>Giảm giá (Mã giảm giá):</label>
 
                   <span v-if="listOrder[indexOrder()].voucher.type === VoucherType.MONEY" style="float: right;">
-                    -{{ formatCurrencyVND(listOrder[indexOrder()].listOrderDetail.reduce((sum, od) => sum + (od.quantity * od.productDetailPriceNet), 0) - listOrder[indexOrder()].voucher.value) }}
+                    -{{ formatCurrencyVND(listOrder[indexOrder()].voucher.value) }}
                   </span>
 
                   <span v-else style="float: right;">
@@ -262,11 +280,55 @@
                   <span style="float: right;">{{ formatCurrencyVND(listOrder[indexOrder()].totalAmountNet) }}</span>
                 </div>
               </el-form-item>
+
+              <el-form-item prop="moneyPaid">
+                <div>
+                  <label>Tiền khách đưa:</label>
+
+                  <div style="float: right;">
+                    <el-input v-model="listOrder[indexOrder()].moneyPaid" class="input-border-bottom" @input="calculatedMoneyRefunds(indexOrder())">
+                      <i slot="suffix" class="el-icon-money" />
+                    </el-input>
+                  </div>
+                </div>
+              </el-form-item>
+
+              <el-form-item>
+                <div>
+                  <label>Trả lại khách:</label>
+
+                  <span style="float: right;">{{ formatCurrencyVND(listOrder[indexOrder()].moneyRefunds) }}</span>
+                </div>
+              </el-form-item>
+
+              <el-form-item>
+                <el-button style="width: 100%;" type="primary" @click="pay(indexOrder())">Thanh toán</el-button>
+              </el-form-item>
             </el-form>
           </div>
         </div>
       </el-col>
     </el-row>
+
+    <el-dialog
+      width="30%"
+      title="Hóa đơn"
+      :visible.sync="isDialogInvoice"
+      :close-on-click-modal="false"
+      @closed="closeDialogInvoice()"
+    >
+      <div id="invoice">
+        ádasdasd
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeDialogInvoice()">
+          Hủy
+        </el-button>
+        <el-button type="primary" @click="printInvoice()">
+          In
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -276,12 +338,24 @@ import { formatCurrencyVND } from '@/utils/format'
 import { productGetAllBySalesAtTheCounter } from '@/api/product'
 import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { voucherGetAllLikeCodeAndStillActive, voucherGetByCode } from '@/api/voucher'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 export default {
   name: 'ProductManagementBrandListPage',
   components: {},
   data() {
+    var validateQuantity = (rule, value, callback) => {
+      if (isNaN(value)) {
+        callback(new Error('Số lượng phải là số'))
+      } else if (value <= 0) {
+        callback(new Error('Số lượng phải lớn hơn 0'))
+      } else {
+        callback()
+      }
+    }
     return {
+      isDialogInvoice: true,
       tableKey: 0,
       moment: moment,
       VoucherType: VoucherType,
@@ -314,11 +388,34 @@ export default {
           listOrderDetail: [],
           isVoucher: false,
           voucherCode: '',
-          voucher: null
+          voucher: null,
+          moneyPaid: 0,
+          moneyRefunds: 0
         }
       ],
       orderIndex: 1,
-      searchProductDetail: ''
+      searchProductDetail: '',
+      rulesFormInformation: {
+        fullName: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        phoneNumber: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ]
+        // address: [
+        //   { required: true, message: 'Không được để trống', trigger: 'blur' }
+        // ]
+      },
+      rulesFormPay: {
+        moneyPaid: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ]
+      },
+      rulesFormQuantity: {
+        quantity: [
+          { validator: validateQuantity, trigger: 'blur' }
+        ]
+      }
     }
   },
   watch: {},
@@ -328,6 +425,37 @@ export default {
   mounted() {},
   destroyed() {},
   methods: {
+    closeDialogInvoice() {
+      this.isDialogInvoice = false
+    },
+    printInvoice() {
+      const invoice = document.getElementById('invoice')
+      html2canvas(invoice).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png')
+        // eslint-disable-next-line new-cap
+        const pdf = new jsPDF()
+        pdf.addImage(imgData, 'PNG', 0, 0)
+        const pdfBlob = pdf.output('blob')
+
+        // Mở PDF và in
+        const blobURL = URL.createObjectURL(pdfBlob)
+        // const printWindow = window.open(blobURL)
+
+        // printWindow.print()
+
+        const iframe = document.createElement('iframe')
+        iframe.style.display = 'none'
+        iframe.src = blobURL
+        document.body.appendChild(iframe)
+
+        // Print the PDF once the iframe loads
+        iframe.onload = () => {
+          iframe.contentWindow.print()
+          document.body.removeChild(iframe)
+          URL.revokeObjectURL(blobURL)
+        }
+      })
+    },
     addOrder(o) {
       // eslint-disable-next-line prefer-const
       let newOrderId = ++this.orderIndex + ''
@@ -356,7 +484,9 @@ export default {
         listOrderDetail: [],
         isVoucher: false,
         voucherCode: '',
-        voucher: null
+        voucher: null,
+        moneyPaid: 0,
+        moneyRefunds: 0
       })
       this.orderId = newOrderId
     },
@@ -395,22 +525,27 @@ export default {
     selectProductDetail(item, i) {
       // console.log(i)
       // console.log(item)
-      this.listOrder[i].listOrderDetail.push({
-        id: null,
-        orderId: null,
-        productDetail: item,
-        productDetailId: item.id,
-        productDetailPrice: item.price,
-        productDetailPriceNet: item.priceNet,
-        quantity: 1,
-        totalAmount: item.price * 1,
-        totalAmountNet: item.priceNet * 1,
-        createdAt: '',
-        updatedAt: '',
-        createdBy: '',
-        updatedBy: '',
-        status: Status.ACTIVE
-      })
+      const j = this.listOrder[i].listOrderDetail.findIndex(o => o.productDetailId === item.id)
+      if (j === -1) {
+        this.listOrder[i].listOrderDetail.push({
+          id: null,
+          orderId: null,
+          productDetail: item,
+          productDetailId: item.id,
+          productDetailPrice: item.price,
+          productDetailPriceNet: item.priceNet,
+          quantity: 1,
+          totalAmount: item.price * 1,
+          totalAmountNet: item.priceNet * 1,
+          createdAt: '',
+          updatedAt: '',
+          createdBy: '',
+          updatedBy: '',
+          status: Status.ACTIVE
+        })
+      } else {
+        this.listOrder[i].listOrderDetail[j].quantity = this.listOrder[i].listOrderDetail[j].quantity + 1
+      }
 
       this.calculatedTotalMoney(i)
     },
@@ -457,6 +592,7 @@ export default {
       if (!this.listOrder[i].isVoucher) {
         this.listOrder[i].voucher = null
         this.listOrder[i].voucherCode = ''
+        this.listOrder[i].voucherId = ''
       }
 
       if (this.listOrder[i].isVoucher && this.listOrder[i].voucherCode) {
@@ -464,12 +600,13 @@ export default {
           .then(res => {
             if (res && res.code === ResponseCode.CODE_SUCCESS && res.data) {
               this.listOrder[i].voucher = res.data
+              this.listOrder[i].voucherId = res.data.id
             }
           })
       }
 
       if (this.listOrder[i].voucher && this.listOrder[i].voucher.type === VoucherType.MONEY) {
-        totalDiscountMoney = this.listOrder[i].voucher.value
+        totalDiscountMoney = this.listOrder[i].voucher.value > this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) ? this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) : this.listOrder[i].voucher.value
         discountMoney = this.listOrder[i].voucher.value / this.listOrder[i].listOrderDetail.reduce((sum, od) => sum + Number(od.quantity), 0)
       }
 
@@ -502,6 +639,95 @@ export default {
 
       this.listOrder[i].totalAmount = totalAmountP
       this.listOrder[i].totalAmountNet = totalAmountPNet
+      this.calculatedMoneyRefunds(i)
+    },
+    changeQuantity(i, j, value) {
+      if (value <= 0) {
+        this.$confirm('Sản phẩm này sẽ bị xóa?', 'Cảnh báo', {
+          confirmButtonText: 'Xác nhận',
+          cancelButtonText: 'Hủy',
+          type: 'warning'
+        }).then(async() => {
+          this.listOrder[i].listOrderDetail.splice(j, 1)
+        })
+      }
+      this.calculatedTotalMoney(i)
+    },
+    increaseQuantity(i, j) {
+      this.listOrder[i].listOrderDetail[j].quantity++
+    },
+    reduceQuantity(i, j) {
+      if (this.listOrder[i].listOrderDetail[j].quantity - 1 <= 0) {
+        this.$confirm('Sản phẩm này sẽ bị xóa?', 'Cảnh báo', {
+          confirmButtonText: 'Xác nhận',
+          cancelButtonText: 'Hủy',
+          type: 'warning'
+        }).then(async() => {
+          this.listOrder[i].listOrderDetail.splice(j, 1)
+        })
+      } else {
+        this.listOrder[i].listOrderDetail[j].quantity--
+      }
+    },
+    calculatedMoneyRefunds(i) {
+      this.listOrder[i].moneyRefunds = this.listOrder[i].moneyPaid >= this.listOrder[i].totalAmountNet ? this.listOrder[i].moneyPaid - this.listOrder[i].totalAmountNet : 0
+    },
+    pay(i) {
+      this.printInvoice()
+      // eslint-disable-next-line no-unused-vars
+      let isValidate = true
+
+      if (this.listOrder[i].listOrderDetail.length === 0) {
+        this.$message({
+          showClose: true,
+          message: 'Chưa thêm sản phẩm nào. Vui lòng thêm ít nhất 1 sản phẩm.',
+          type: 'error'
+        })
+        return
+      }
+
+      for (let j = 0; j < this.listOrder[i].listOrderDetail.length; j++) {
+        this.$refs.dataFormQuantity[j].validate(valid => {
+          if (!valid) {
+            isValidate = false
+            return false
+          }
+        })
+      }
+
+      if (!isValidate) {
+        this.$message({
+          showClose: true,
+          message: 'Nhập đúng số lượng sản phẩm',
+          type: 'error'
+        })
+        return
+      }
+
+      this.$refs.dataFormInformation.validate(valid => {
+        if (!valid) {
+          isValidate = false
+          return false
+        }
+      })
+
+      this.$refs.dataFormPay.validate(valid => {
+        if (!valid) {
+          isValidate = false
+          return false
+        }
+      })
+
+      if (!isValidate) {
+        this.$message({
+          showClose: true,
+          message: 'Vui lòng nhập đủ thông tin',
+          type: 'error'
+        })
+        return
+      }
+
+      console.log(this.listOrder[i])
     }
   }
 }

@@ -151,7 +151,7 @@
           :rules="rules"
         >
           <el-form-item v-if="voucher.id" label="Mã" prop="code">
-            <el-input v-model="voucher.code" disabled="true" />
+            <el-input v-model="voucher.code" :disabled="true" />
           </el-form-item>
 
           <el-form-item label="Loại giảm giá" prop="type">
@@ -302,6 +302,9 @@ export default {
         ],
         startDate: [
           { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
+        ],
+        max: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
         ]
       }
     }
