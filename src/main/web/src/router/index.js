@@ -175,14 +175,15 @@ export const asyncRoutes = [
     name: 'sales-at-the-counter',
     meta: {
       title: 'Bán hàng tại quầy',
-      icon: 'component'
+      icon: 'component',
+      roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES']
     },
     children: [
       {
         path: 'sales',
         component: () => import('@/views-system/cms/sales-at-the-counter/index.vue'),
         name: 'sales-at-the-counter-page',
-        meta: { title: 'Bán hàng tại quầy', noCache: true }
+        meta: { title: 'Bán hàng tại quầy', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       }
     ]
   },
@@ -193,7 +194,8 @@ export const asyncRoutes = [
     name: 'product-management',
     meta: {
       title: 'Quản lý Sản phẩm',
-      icon: 'component'
+      icon: 'component',
+      roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES']
     },
     children: [
       {
@@ -201,19 +203,19 @@ export const asyncRoutes = [
         component: () => import('@/layout-empty'),
         redirect: '/admin/product-management/product/list',
         name: 'product-management-product-page',
-        meta: { title: 'Sản phẩm', noCache: true },
+        meta: { title: 'Sản phẩm', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] },
         children: [
           {
             path: 'list',
             component: () => import('@/views-system/cms/product-management/product/index.vue'),
             name: 'product-management-product-detail-list-page',
-            meta: { title: 'Sản phẩm', noCache: true }
+            meta: { title: 'Sản phẩm', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
           },
           {
             path: 'detail',
             component: () => import('@/views-system/cms/product-management/product/product-detail.vue'),
             name: 'product-management-product-detail-detail-page',
-            meta: { title: 'Chi tiết Sản phẩm', noCache: true },
+            meta: { title: 'Chi tiết Sản phẩm', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] },
             hidden: true
           }
         ]
@@ -222,31 +224,31 @@ export const asyncRoutes = [
         path: 'category/list',
         component: () => import('@/views-system/cms/product-management/category/index.vue'),
         name: 'product-management-category-page',
-        meta: { title: 'Danh mục', noCache: true }
+        meta: { title: 'Danh mục', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       },
       {
         path: 'brand/list',
         component: () => import('@/views-system/cms/product-management/brand/index.vue'),
         name: 'product-management-brand-page',
-        meta: { title: 'Thương hiệu', noCache: true }
+        meta: { title: 'Thương hiệu', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       },
       {
         path: 'size/list',
         component: () => import('@/views-system/cms/product-management/size/index.vue'),
         name: 'product-management-size-page',
-        meta: { title: 'Kích cỡ', noCache: true }
+        meta: { title: 'Kích cỡ', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       },
       {
         path: 'color/list',
         component: () => import('@/views-system/cms/product-management/color/index.vue'),
         name: 'product-management-color-page',
-        meta: { title: 'Màu sắc', noCache: true }
+        meta: { title: 'Màu sắc', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       },
       {
         path: 'material/list',
         component: () => import('@/views-system/cms/product-management/material/index.vue'),
         name: 'product-management-material-page',
-        meta: { title: 'Chất liệu', noCache: true }
+        meta: { title: 'Chất liệu', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       }
     ]
   },
@@ -264,7 +266,7 @@ export const asyncRoutes = [
         path: 'list',
         component: () => import('@/views-system/cms/voucher-management/index.vue'),
         name: 'voucher-management-list-page',
-        meta: { title: 'Quản lý Mã giảm giá', noCache: true }
+        meta: { title: 'Quản lý Mã giảm giá', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       }
     ]
   },
