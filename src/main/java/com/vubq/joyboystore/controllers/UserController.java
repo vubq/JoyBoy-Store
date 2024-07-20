@@ -32,6 +32,7 @@ public class UserController {
             if (user != null) {
                 return Response.build().ok().data(
                         UserInfoDto.builder()
+                                .userId(user.getId())
                                 .roles(user.getRoles().stream().map(role -> role.getName().toString()).collect(Collectors.toList()))
                                 .name(user.getFullName())
                                 .avatar(user.getAvatar())

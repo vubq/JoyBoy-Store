@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VNPayDTO {
+public class VNPayDto {
     private String id;
     private int money;
     private String bankCode;

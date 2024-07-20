@@ -49,7 +49,7 @@
                         <el-divider v-if="item.index !== 0" class="divider-custom" />
                         <div style="margin-top: 20px; margin-bottom: 20px; display: flex;">
                           <el-image
-                            style="width: 100px; height: 100px"
+                            style="width: 130px; height: 130px"
                             :src="item.listImage.length > 0 ? item.listImage[0] : item.product.listImage[0]"
                           />
                           <div style="margin-left: 20px;">
@@ -62,6 +62,9 @@
                             <div style="width: 100%;">
                               <span>Giá: {{ formatCurrencyVND(item.priceNet) }} <span v-if="item.price > item.priceNet" style="text-decoration: line-through;">({{ formatCurrencyVND(item.price) }})</span></span>
                             </div>
+                            <div style="width: 100%;">
+                              <span>Số lượng còn lại: {{ item.quantity }}</span>
+                            </div>
                           </div>
                         </div>
                         <el-divider v-if="item.index === item.listSize" class="divider-custom" />
@@ -72,6 +75,7 @@
                       :key="tableKey"
                       :data="o.listOrderDetail"
                       style="width: 100%;"
+                      class="tableOPD"
                     >
                       <el-table-column label="Stt" align="center" width="50">
                         <template slot-scope="scope">
@@ -340,6 +344,7 @@ import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { voucherGetAllLikeCodeAndStillActive, voucherGetByCode } from '@/api/voucher'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+import { orderPaySalesAtTheCounter } from '@/api/order'
 
 export default {
   name: 'ProductManagementBrandListPage',
@@ -355,7 +360,7 @@ export default {
       }
     }
     return {
-      isDialogInvoice: true,
+      isDialogInvoice: false,
       tableKey: 0,
       moment: moment,
       VoucherType: VoucherType,
@@ -413,7 +418,7 @@ export default {
       },
       rulesFormQuantity: {
         quantity: [
-          { validator: validateQuantity, trigger: 'blur' }
+          { validator: validateQuantity, trigger: 'change' }
         ]
       }
     }
@@ -673,7 +678,6 @@ export default {
       this.listOrder[i].moneyRefunds = this.listOrder[i].moneyPaid >= this.listOrder[i].totalAmountNet ? this.listOrder[i].moneyPaid - this.listOrder[i].totalAmountNet : 0
     },
     pay(i) {
-      this.printInvoice()
       // eslint-disable-next-line no-unused-vars
       let isValidate = true
 
@@ -727,7 +731,22 @@ export default {
         return
       }
 
-      console.log(this.listOrder[i])
+      this.$confirm('Xác nhận thanh toán?', 'Xác nhận', {
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        type: 'warning'
+      }).then(async() => {
+        orderPaySalesAtTheCounter(this.listOrder[i]).then(res => {
+          if (res && res.code === ResponseCode.CODE_SUCCESS) {
+            this.listOrder[i].listOrderDetail.splice(i, 1)
+            this.$message({
+              showClose: true,
+              message: 'Thanh toán thành công.',
+              type: 'success'
+            })
+          }
+        })
+      })
     }
   }
 }
@@ -761,6 +780,12 @@ export default {
 ::v-deep .input-quantity {
   input {
     padding-left: 1px; padding-right: 1px;
+  }
+}
+
+::v-deep .tableOPD {
+  .el-table--medium th, .el-table--medium td {
+    height: 80px;
   }
 }
 </style>

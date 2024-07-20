@@ -110,4 +110,9 @@ public class ProductServiceImpl implements ProductService {
                         .and(colorId.equals("ALL") ? null : specColorIdEquality)
                 , pageable);
     }
+
+    @Override
+    public List<Product> getTop5ProductCreatedAtDESC() {
+        return this.productRepository.getTop5ProductCreatedAtDESC();
+    }
 }

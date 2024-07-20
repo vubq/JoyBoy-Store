@@ -50,6 +50,12 @@ public class ProductController extends BaseController {
     @Autowired
     private MaterialService materialService;
 
+    @Autowired
+    private FeedbackService feedbackService;
+
+    @Autowired
+    private OrderDetailService orderDetailService;
+
     @PostMapping
     public Response createOrUpdate(@RequestBody ProductCorUDto dto) {
         List<Image> listImageNew = new ArrayList<>();
@@ -374,5 +380,182 @@ public class ProductController extends BaseController {
             listProductDetailSATC.add(productDetailSATC);
         });
         return Response.build().ok().data(listProductDetailSATC);
+    }
+
+    @GetMapping("get-top-5-product-create-at-desc")
+    public Response getTop5ProductCreatedAtDESC() {
+        List<Product> listProduct = this.productService.getTop5ProductCreatedAtDESC();
+        List<ProductWebViewDto> listProductWebViewDto = new ArrayList<>();
+        listProduct.forEach(p -> {
+            ProductWebViewDto productWebViewDto = ProductWebViewDto.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .description(p.getDescription())
+                    .price(p.getPrice())
+                    .priceNet(p.getPriceNet())
+                    .category(
+                            CategoryDto.builder()
+                                    .id(p.getCategory().getId())
+                                    .name(p.getCategory().getName())
+                                    .build()
+                    )
+                    .brand(
+                            BrandDto.builder()
+                                    .id(p.getBrand().getId())
+                                    .name(p.getBrand().getName())
+                                    .build()
+                    )
+                    .rate(this.feedbackService.getRateProduct(p.getId()))
+                    .listImage(this.imageService.getAllUrlBySecondaryId(p.getId()))
+                    .build();
+            List<ProductDetail> listProductDetail = this.productDetailService.getAllByProductId(p.getId());
+            List<ProductDetailWebViewDto> listProductDetailWebViewDto = new ArrayList<>();
+            listProductDetail.forEach(pd -> {
+                ProductDetailWebViewDto productDetailWebViewDto = ProductDetailWebViewDto.builder()
+                        .id(pd.getId())
+                        .price(pd.getPrice())
+                        .priceNet(pd.getPriceNet())
+                        .quantity(pd.getQuantity())
+                        .size(
+                                SizeDto.builder()
+                                        .id(pd.getSize().getId())
+                                        .name(pd.getSize().getName())
+                                        .build()
+                        )
+                        .color(
+                                ColorDto.builder()
+                                        .id(pd.getColor().getId())
+                                        .name(pd.getColor().getName())
+                                        .build()
+                        )
+                        .material(
+                                MaterialDto.builder()
+                                        .id(pd.getMaterial().getId())
+                                        .name(pd.getMaterial().getName())
+                                        .build()
+                        )
+                        .listImage(this.imageService.getAllUrlBySecondaryId(pd.getId()))
+                        .build();
+                listProductDetailWebViewDto.add(productDetailWebViewDto);
+            });
+            productWebViewDto.setListProductDetail(listProductDetailWebViewDto);
+            listProductWebViewDto.add(productWebViewDto);
+        });
+        return Response.build().ok().data(listProductWebViewDto);
+    }
+
+    @GetMapping("get-product-view-by-id/{id}")
+    public Response getProductViewById(@PathVariable String id) {
+        Product p = this.productService.getById(id);
+            ProductWebViewDto productWebViewDto = ProductWebViewDto.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .description(p.getDescription())
+                    .price(p.getPrice())
+                    .priceNet(p.getPriceNet())
+                    .category(
+                            CategoryDto.builder()
+                                    .id(p.getCategory().getId())
+                                    .name(p.getCategory().getName())
+                                    .build()
+                    )
+                    .brand(
+                            BrandDto.builder()
+                                    .id(p.getBrand().getId())
+                                    .name(p.getBrand().getName())
+                                    .build()
+                    )
+                    .rate(this.feedbackService.getRateProduct(p.getId()))
+                    .listImage(this.imageService.getAllUrlBySecondaryId(p.getId()))
+                    .build();
+            List<ProductDetail> listProductDetail = this.productDetailService.getAllByProductId(p.getId());
+            List<ProductDetailWebViewDto> listProductDetailWebViewDto = new ArrayList<>();
+            listProductDetail.forEach(pd -> {
+                ProductDetailWebViewDto productDetailWebViewDto = ProductDetailWebViewDto.builder()
+                        .id(pd.getId())
+                        .price(pd.getPrice())
+                        .priceNet(pd.getPriceNet())
+                        .quantity(pd.getQuantity())
+                        .size(
+                                SizeDto.builder()
+                                        .id(pd.getSize().getId())
+                                        .name(pd.getSize().getName())
+                                        .build()
+                        )
+                        .color(
+                                ColorDto.builder()
+                                        .id(pd.getColor().getId())
+                                        .name(pd.getColor().getName())
+                                        .build()
+                        )
+                        .material(
+                                MaterialDto.builder()
+                                        .id(pd.getMaterial().getId())
+                                        .name(pd.getMaterial().getName())
+                                        .build()
+                        )
+                        .listImage(this.imageService.getAllUrlBySecondaryId(pd.getId()))
+                        .build();
+                listProductDetailWebViewDto.add(productDetailWebViewDto);
+            });
+            productWebViewDto.setListProductDetail(listProductDetailWebViewDto);
+        return Response.build().ok().data(productWebViewDto);
+    }
+
+    @GetMapping("get-product-by-id-web-shop/{id}")
+    public Response getProductByIdWebShop(@PathVariable(value = "id") String id) {
+        Product product = this.productService.getById(id);
+        List<String> listSizeId = this.sizeService.getAllByProductId(product.getId());
+        List<SizeDto> sizes = new ArrayList<>();
+        if(listSizeId.size() > 0) {
+            listSizeId.forEach(sizeId -> {
+                SizeDto size = SizeDto.toDto(this.sizeService.getById(sizeId));
+                size.setIsOutOfStock(this.sizeService.getProductInStock(product.getId(), size.getId()).size() > 0 ? false : true);
+                sizes.add(size);
+            });
+        }
+        List<String> listColorId = this.colorService.getAllByProductId(product.getId());
+        List<ColorDto> colors = new ArrayList<>();
+        if(listColorId.size() > 0) {
+            listColorId.forEach(colorId -> {
+                ColorDto color = ColorDto.toDto(this.colorService.getById(colorId));
+                color.setIsOutOfStock(this.colorService.getProductInStock(product.getId(), color.getId()).size() > 0 ? false : true);
+                colors.add(color);
+            });
+        }
+        List<String> listMaterialId = this.materialService.getAllByProductId(product.getId());
+        List<MaterialDto> materials = new ArrayList<>();
+        if(listMaterialId.size() > 0) {
+            listMaterialId.forEach(materialId -> {
+                MaterialDto material = MaterialDto.toDto(this.materialService.getById(materialId));
+                material.setIsOutOfStock(this.materialService.getProductInStock(product.getId(), material.getId()).size() > 0 ? false : true);
+                materials.add(material);
+            });
+        }
+        FilterProductAttributeDTO filter = FilterProductAttributeDTO.builder().productId(product.getId()).build();
+        List<ProductDetail> productDetails = this.productDetailService.filterProductAttributes(filter);
+        Integer totalProductsAvailable = 0;
+        for (ProductDetail productDetail : productDetails) {
+            totalProductsAvailable += productDetail.getQuantity();
+        }
+        return Response.build().ok().data(ProductWebShopDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .priceNet(product.getPriceNet())
+                .brand(product.getBrand())
+                .category(product.getCategory())
+                .createdAt(product.getCreatedAt())
+                .rate(this.feedbackService.getRateProduct(product.getId()))
+                .quantitySold(this.orderDetailService.getQuantitySold(product.getId()))
+                .status(product.getStatus())
+                .quantityOfProductAvailable(this.productDetailService.getQuantityOfProductAvailable(product.getId()))
+                .listImage(this.imageService.getAllUrlBySecondaryId(product.getId()))
+                .colors(colors)
+                .sizes(sizes)
+                .materials(materials)
+                .totalProductsAvailable(totalProductsAvailable)
+                .build());
     }
 }

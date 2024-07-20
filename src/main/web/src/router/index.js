@@ -51,7 +51,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/login',
+    path: '/admin/login',
     component: () => import('@/views/login/index'),
     hidden: true
   },
@@ -73,11 +73,11 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/admin/dashboard',
     hidden: true,
     children: [
       {
-        path: 'dashboard',
+        path: '/admin/dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
         meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
@@ -122,6 +122,42 @@ export const constantRoutes = [
         component: () => import('@/views/profile/index'),
         name: 'Profile',
         meta: { title: 'Profile', icon: 'user', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/shop',
+    component: () => import('@/layout-web'),
+    redirect: '/shop/home',
+    hidden: true,
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views-system/web-view/home'),
+        name: 'Home',
+        meta: { title: 'Home', icon: 'user', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'login',
+        component: () => import('@/views-system/web-view/login'),
+        name: 'Login',
+        meta: { title: 'Login', icon: 'user', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'product/:id',
+        component: () => import('@/views-system/web-view/product'),
+        name: 'Product',
+        meta: { title: 'Product', icon: 'user', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'pay',
+        component: () => import('@/views-system/web-view/pay'),
+        name: 'Pay',
+        meta: { title: 'Pay', icon: 'user', noCache: true },
+        hidden: true
       }
     ]
   }

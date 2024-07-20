@@ -23,4 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     @Query(value = "SELECT p FROM Product p JOIN Feedback f ON p.id = f.productDetail.product.id GROUP BY p.id ORDER BY AVG(f.rate) DESC LIMIT 10")
     List<Product> getTopRateProduct();
+
+    @Query(value = "SELECT p FROM Product p WHERE p.status = com.vubq.joyboystore.enums.EStatus.ACTIVE ORDER BY p.createdAt DESC LIMIT 5")
+    List<Product> getTop5ProductCreatedAtDESC();
 }

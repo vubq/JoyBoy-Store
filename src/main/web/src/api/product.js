@@ -32,3 +32,22 @@ export const productGetAllBySalesAtTheCounter = (params) =>
     method: 'get',
     params
   })
+
+export const productGetTop5ProductCreatedAtDESC = (params) =>
+  request({
+    url: '/product/get-top-5-product-create-at-desc',
+    method: 'get'
+  })
+
+export const productGetProductViewById = (id) =>
+  request({
+    url: '/product/get-product-view-by-id/' + id,
+    method: 'get'
+  })
+
+export const getProductByIdWebShop = (id) =>
+  request({
+    url: '/product/get-product-by-id-web-shop/' + id,
+    method: 'get'
+  })
+

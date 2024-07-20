@@ -20,8 +20,8 @@ public class ProductWebShopDTO {
     private String id;
     private String name;
     private String description;
-    private String image;
     private Double price;
+    private Double priceNet;
     private Category category;
     private Brand brand;
     private Date createdAt;

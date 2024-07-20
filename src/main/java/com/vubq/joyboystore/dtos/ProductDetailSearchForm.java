@@ -11,8 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TokenDto {
+public class ProductDetailSearchForm {
 
-    private String token;
-    private List<String> roles;
+    private List<String> listProductDetailId;
 }

@@ -2,16 +2,13 @@
 import { login, getInfo } from '@/api/auth'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
-import { Role } from '@/enums/enums'
 
 const state = {
   token: getToken(),
   name: '',
   avatar: '',
   introduction: '',
-  roles: [],
-  userId: '',
-  isCustomer: false
+  roles: []
 }
 
 const mutations = {
@@ -29,12 +26,6 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
-  },
-  SET_USERID: (state, userId) => {
-    state.userId = userId
-  },
-  SET_ISCUSTOMER: (state, isCustomer) => {
-    state.isCustomer = isCustomer
   }
 }
 
@@ -46,7 +37,6 @@ const actions = {
       login({ userName: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
-        commit('SET_ROLES', data.roles)
         setToken(data.token)
         resolve()
       }).catch(error => {
@@ -65,15 +55,13 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { userId, roles, name, avatar, introduction } = data
+        const { roles, name, avatar, introduction } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
 
-        commit('SET_ISCUSTOMER', roles.includes(Role.ROLE_CUSTOMER))
-        commit('SET_USERID', userId)
         commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
@@ -104,11 +92,6 @@ const actions = {
       // })
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
-      commit('SET_ISCUSTOMER', false)
-      commit('SET_USERID', '')
-      commit('SET_NAME', '')
-      commit('SET_AVATAR', '')
-      commit('SET_INTRODUCTION', '')
       removeToken()
       resetRouter()
 

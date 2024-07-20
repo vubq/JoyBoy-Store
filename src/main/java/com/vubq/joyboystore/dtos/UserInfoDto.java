@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class UserInfoDto {
 
+    private String userId;
     private List<String> roles;
     private String name;
     private String avatar;

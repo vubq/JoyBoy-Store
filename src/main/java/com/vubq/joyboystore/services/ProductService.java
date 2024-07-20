@@ -29,4 +29,6 @@ public interface ProductService {
     );
 
     List<String> getAllProductIdInOfStock();
+
+    List<Product> getTop5ProductCreatedAtDESC();
 }
