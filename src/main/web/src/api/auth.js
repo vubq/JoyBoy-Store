@@ -14,3 +14,11 @@ export function getInfo() {
     method: 'get'
   })
 }
+
+export function getUserInfo() {
+  return request({
+    url: '/user/get-user-info',
+    method: 'get'
+  })
+}
+

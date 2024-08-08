@@ -52,3 +52,10 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  ::v-deep .el-menu-item,
+  ::v-deep .el-submenu {
+    border-radius: 0 !important;
+  }
+</style>

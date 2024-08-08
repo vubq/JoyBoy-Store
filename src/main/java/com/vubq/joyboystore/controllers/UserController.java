@@ -43,4 +43,17 @@ public class UserController {
         }
         return Response.build().code(401);
     }
+
+    @GetMapping("/get-user-info")
+    public Response getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = this.userService.findByUserName(userDetails.getUsername()).orElse(null);
+            if (user != null) {
+                return Response.build().ok().data(user);
+            }
+        }
+        return Response.build().code(401);
+    }
 }

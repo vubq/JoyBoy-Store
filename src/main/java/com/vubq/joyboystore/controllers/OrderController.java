@@ -63,7 +63,7 @@ public class OrderController extends BaseController {
             if (voucher == null) {
                 return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá không tồn tại.");
             } else {
-                if (voucher.getQuantity() > 0) {
+                if (voucher.getQuantity() <= 0) {
                     return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá đã hết.");
                 }
                 orderNew.setVoucherId(voucher.getId());
@@ -126,19 +126,19 @@ public class OrderController extends BaseController {
                 .paymentType2(EPaymentType2.CASH)
                 .build();
 
-//        Voucher voucher = null;
-//        if (dto.getIsVoucher()) {
-//            voucher = this.voucherService.getById(dto.getVoucherId());
-//            if (voucher == null) {
-//                return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá không tồn tại.");
-//            } else {
-//                if (voucher.getQuantity() > 0) {
-//                    return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá đã hết.");
-//                }
-//                orderNew.setVoucherId(voucher.getId());
-//                voucher.setQuantity(voucher.getQuantity() - 1);
-//            }
-//        }
+        Voucher voucher = null;
+        if (dto.getIsVoucher()) {
+            voucher = this.voucherService.getById(dto.getVoucherId());
+            if (voucher == null) {
+                return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá không tồn tại.");
+            } else {
+                if (voucher.getQuantity() <= 0) {
+                    return Response.build().code(Response.CODE_INTERNAL_ERROR).data("Mã giảm giá đã hết.");
+                }
+                orderNew.setVoucherId(voucher.getId());
+                voucher.setQuantity(voucher.getQuantity() - 1);
+            }
+        }
 
         List<OrderDetail> listOrderDetail = new ArrayList<>();
         for(int i = 0; i < dto.getListOrderDetail().size(); i++) {
@@ -158,7 +158,7 @@ public class OrderController extends BaseController {
         }
 
         Order order = this.orderService.save(orderNew);
-//        this.voucherService.save(voucher);
+        this.voucherService.save(voucher);
         listOrderDetail.forEach(od -> od.setOrder(order));
         this.orderDetailService.saveAll(listOrderDetail);
         return Response.build().ok();

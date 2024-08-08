@@ -6,7 +6,7 @@
         <el-col :span="12">
           <el-form>
             <el-row :gutter="20">
-              <el-col :span="24">
+              <!-- <el-col :span="24">
                 <el-form-item>
                   <el-alert
                     title="Vui lòng đăng nhập và nhập thông tin để có thể theo dõi trạng thái đơn hàng."
@@ -15,7 +15,7 @@
                     :closable="false"
                   />
                 </el-form-item>
-              </el-col>
+              </el-col> -->
 
               <el-col :span="12">
                 <el-form-item style="margin-bottom: 10px;">
@@ -125,18 +125,18 @@
                 <el-col :span="8" style="text-align: end;">
                   <div style="font-size: 16px;">Tổng tiền</div>
                 </el-col>
-                <div v-for="p in productInCart" :key="p.id">
-                  <el-col :span="16" style="margin-top: 10px;">
+                <div v-for="od in orderW.listOrderDetail" :key="od.productDetailId">
+                  <el-col :span="14" style="margin-top: 10px;">
                     <div style="">
-                      {{ genQuantityPurchased(p.id) }}
+                      {{ od.quantity }}
                       <i class="el-icon-close" style="cursor: pointer;" />
-                      {{ p.product.name }}
+                      {{ od.productDetail.product.name }}
                     </div>
                   </el-col>
-                  <el-col :span="8" style="text-align: end; margin-top: 10px;">
+                  <el-col :span="10" style="text-align: end; margin-top: 10px;">
                     <div style="color: #ee4d2d;">
-                      <span v-if="genTotalMoneyProduct(p.id, p.price) > genTotalMoneyProduct(p.id, p.priceNet)" style="text-decoration: line-through; color: rgba(0,0,0,.26);">{{ formatCurrencyVND(genTotalMoneyProduct(p.id, p.price)) }}</span>
-                      {{ formatCurrencyVND(genTotalMoneyProduct(p.id, p.priceNet)) }}
+                      <span v-if="od.totalAmount > od.totalAmountNet" style="text-decoration: line-through; color: rgba(0,0,0,.26);">{{ formatCurrencyVND(od.totalAmount) }}</span>
+                      {{ formatCurrencyVND(od.totalAmountNet) }}
                     </div>
                   </el-col>
                 </div>
@@ -144,14 +144,14 @@
             </div>
             <el-divider class="pay-divider" />
             <div>
-              <div style="font-size: 16px; margin-bottom: 10px;">Mã giảm giá</div>
+              <div style="font-size: 16px; margin-bottom: 10px;">Mã giảm giá <span v-if="orderW.voucher">({{ orderW.voucher.type === 'PERCENT' ? orderW.voucher.value + '% - tối đa ' + formatCurrencyVND(orderW.voucher.max) : formatCurrencyVND(orderW.voucher.value) }})</span></div>
               <div>
                 <el-row :gutter="20">
                   <el-col :span="18">
-                    <el-input />
+                    <el-input v-model="orderW.voucherCode" />
                   </el-col>
                   <el-col :span="6">
-                    <div style="font-size: 18px; cursor: pointer; background-color: #11A983; color: #fff; border-radius: 4px; padding: auto; height: 36px; display: flex; align-items: center; justify-content: center;">Áp dụng</div>
+                    <div style="font-size: 18px; cursor: pointer; background-color: #11A983; color: #fff; border-radius: 4px; padding: auto; height: 36px; display: flex; align-items: center; justify-content: center;" @click="apMa()">Áp dụng</div>
                   </el-col>
                 </el-row>
               </div>
@@ -173,9 +173,9 @@
                   <div style="margin-top: 10px;">Tổng thanh toán</div>
                 </el-col>
                 <el-col :span="8" style="text-align: end;">
-                  <div style="font-size: 16px; color: #ee4d2d;">{{ formatCurrencyVND(genTotalMoney()) }}</div>
-                  <div style="font-size: 16px; color: #ee4d2d; margin-top: 10px;">-{{ formatCurrencyVND(genTotalMoney() - genTotalMoneyNet()) }}</div>
-                  <div style="font-size: 16px; color: #ee4d2d; margin-top: 10px;">{{ formatCurrencyVND(genTotalMoneyNet()) }}</div>
+                  <div style="font-size: 16px; color: #ee4d2d;">{{ formatCurrencyVND(orderW.totalAmount) }}</div>
+                  <div style="font-size: 16px; color: #ee4d2d; margin-top: 10px;">-{{ formatCurrencyVND(orderW.totalAmount - orderW.totalAmountNet) }}</div>
+                  <div style="font-size: 16px; color: #ee4d2d; margin-top: 10px;">{{ formatCurrencyVND(orderW.totalAmountNet) }}</div>
                 </el-col>
               </el-row>
               <div style="font-size: 18px; cursor: pointer; margin-top: 10px; background-color: #11A983; color: #fff; border-radius: 4px; padding: auto; height: 36px; display: flex; align-items: center; justify-content: center;" @click="payment">
@@ -204,10 +204,12 @@
 import { getAllProductDetailByListId } from '@/api/product-detail'
 import { paymentOnline } from '@/api/payment'
 import { orderOnline } from '@/api/order'
-import { ResponseCode, Status } from '@/enums/enums'
+import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { formatCurrencyVND } from '@/utils/format'
 import { mapActions, mapGetters } from 'vuex'
 import axios from 'axios'
+import { voucherGetByCode } from '@/api/voucher'
+import { getUserInfo } from '@/api/auth'
 
 export default {
   name: 'PayPage',
@@ -242,6 +244,9 @@ export default {
         city: '',
         district: '',
         ward: '',
+        provinceId: '',
+        districtId: '',
+        wardId: '',
         totalAmount: 0,
         totalAmountNet: 0,
         voucherId: '',
@@ -270,7 +275,8 @@ export default {
       'allInfor',
       'pay',
       'userId',
-      'order'
+      'order',
+      'orderWStore'
     ])
   },
   watch: {
@@ -336,12 +342,24 @@ export default {
         }
       })
     if (this.cart.length > 0) {
-      this.getListProductDetail()
+      await this.getListProductDetail()
     }
+
+    await getUserInfo().then((res) => {
+      if (res && res.code === ResponseCode.CODE_SUCCESS) {
+        this.orderW.fullName = res.data.fullName
+        this.orderW.address = res.data.address
+        this.orderW.phoneNumber = res.data.phoneNumber
+        this.orderW.email = res.data.email
+        this.cityCode = res.data.cityCode
+        this.districtCode = res.data.districtCode
+        this.wardCode = res.data.wardCode
+      }
+    })
+
     console.log(this.$route.query.vnp_TransactionStatus)
-    if (this.$route.query.vnp_TransactionStatus === '00') {
-      await this.setListOrderDetail()
-      orderOnline(this.order).then(res => {
+    if (this.$route.query.vnp_TransactionStatus === '00' && this.orderWStore) {
+      orderOnline(this.orderWStore).then(res => {
         if (res && res.code === ResponseCode.CODE_SUCCESS) {
           this.clearCart()
           this.$notify({
@@ -360,7 +378,8 @@ export default {
     ...mapActions([
       'clearCart',
       'setPay',
-      'setOrder'
+      'setOrder',
+      'setOrderW'
     ]),
     formatCurrenyVND_d(value) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
@@ -371,8 +390,28 @@ export default {
       }).then(res => {
         if (res && res.code === ResponseCode.CODE_SUCCESS) {
           this.productInCart = res.data
+          res.data.forEach((e) => {
+            this.orderW.listOrderDetail.push({
+              id: null,
+              orderId: null,
+              productDetail: e,
+              productDetailId: e.id,
+              productDetailPrice: e.price,
+              productDetailPriceNet: e.priceNet,
+              quantity: this.cart.find(e1 => e1.productDetailId === e.id).quantity,
+              totalAmount: e.price * this.cart.find(e1 => e1.productDetailId === e.id).quantity,
+              totalAmountNet: e.priceNet * this.cart.find(e1 => e1.productDetailId === e.id).quantity,
+              createdAt: '',
+              updatedAt: '',
+              createdBy: '',
+              updatedBy: '',
+              status: Status.ACTIVE
+            })
+          })
         }
       })
+      console.log(this.orderW)
+      await this.calculatedTotalMoney()
     },
     genQuantityPurchased(productDetailId) {
       console.log(this.cart.find(e => e.productDetailId === productDetailId))
@@ -415,7 +454,7 @@ export default {
       if (this.orderW.paymentType === 'PAYMENT_ONLINE') {
         paymentOnline({
           id: this.userId,
-          money: this.genTotalMoneyNet(),
+          money: this.orderW.totalAmountNet,
           bankCode: '',
           billMobile: this.orderW.phoneNumber,
           billEmail: this.orderW.email,
@@ -426,10 +465,14 @@ export default {
           billState: ''
         }).then(res => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
+            this.setOrderW(this.orderW)
             window.location.replace(res.data)
           }
         })
       } else {
+        this.orderW.district = this.listDistrict.find((e) => e.district_id === this.districtCode).district_name
+        this.orderW.ward = this.listWard.find((e) => e.ward_id === this.wardCode).ward_name
+        this.orderW.city = this.listCity.find((e) => e.province_id === this.cityCode).province_name
         orderOnline(this.orderW).then(res => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
             this.clearCart()
@@ -484,6 +527,69 @@ export default {
       })
       this.orderW.totalAmount = this.genTotalMoney()
       this.orderW.totalAmountNet = this.genTotalMoneyNet()
+    },
+    apMa() {
+      this.orderW.isVoucher = true
+      this.calculatedTotalMoney()
+    },
+    async calculatedTotalMoney() {
+      let totalAmountP = 0
+      let totalAmountPNet = 0
+      let totalDiscountMoney = 0
+      let discountMoney = 0
+      let totalPriceDifference = 0
+
+      if (!this.orderW.isVoucher) {
+        this.orderW.voucher = null
+        this.orderW.voucherCode = ''
+        this.orderW.voucherId = ''
+      }
+
+      if (this.orderW.isVoucher && this.orderW.voucherCode) {
+        await voucherGetByCode(this.orderW.voucherCode)
+          .then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS && res.data) {
+              this.orderW.voucher = res.data
+              this.orderW.voucherId = res.data.id
+            }
+          })
+      }
+
+      if (this.orderW.voucher && this.orderW.voucher.type === VoucherType.MONEY) {
+        totalDiscountMoney = this.orderW.voucher.value > this.orderW.listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) ? this.orderW.listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) : this.orderW.voucher.value
+        discountMoney = this.orderW.voucher.value / this.orderW.listOrderDetail.reduce((sum, od) => sum + Number(od.quantity), 0)
+      }
+
+      if (this.orderW.voucher && this.orderW.voucher.type === VoucherType.PERCENT) {
+        totalDiscountMoney = this.orderW.voucher.value * this.orderW.listOrderDetail.reduce((sum, od) => sum + (Number(od.quantity) * Number(od.productDetailPriceNet)), 0) / 100
+        if (totalDiscountMoney > this.orderW.voucher.max) {
+          totalDiscountMoney = this.orderW.voucher.max
+        }
+        discountMoney = totalDiscountMoney / this.orderW.listOrderDetail.reduce((sum, od) => sum + Number(od.quantity), 0)
+      }
+
+      for (let j = 0; j < this.orderW.listOrderDetail.length; j++) {
+        totalPriceDifference += (this.orderW.listOrderDetail[j].productDetailPrice - this.orderW.listOrderDetail[j].productDetailPriceNet) * this.orderW.listOrderDetail[j].quantity
+        const totalAmountOD = this.orderW.listOrderDetail[j].productDetailPrice * this.orderW.listOrderDetail[j].quantity
+        let totalAmountODNet = 0
+        if (this.orderW.isVoucher && this.orderW.voucherCode && this.orderW.voucher) {
+          if (j === this.orderW.listOrderDetail.length - 1) {
+            totalAmountODNet = totalAmountP + totalAmountOD - totalPriceDifference - totalDiscountMoney - totalAmountPNet
+          } else {
+            totalAmountODNet = Math.floor((this.orderW.listOrderDetail[j].productDetailPriceNet * this.orderW.listOrderDetail[j].quantity) - (this.orderW.listOrderDetail[j].quantity > 1 ? (discountMoney * this.orderW.listOrderDetail[j].quantity) : discountMoney))
+          }
+        } else {
+          totalAmountODNet = this.orderW.listOrderDetail[j].productDetailPriceNet * this.orderW.listOrderDetail[j].quantity
+        }
+        this.orderW.listOrderDetail[j].totalAmount = isNaN(totalAmountOD) ? 0 : totalAmountOD
+        this.orderW.listOrderDetail[j].totalAmountNet = isNaN(totalAmountODNet) ? 0 : totalAmountODNet
+        totalAmountP += totalAmountOD
+        totalAmountPNet += totalAmountODNet
+      }
+
+      this.orderW.totalAmount = totalAmountP
+      this.orderW.totalAmountNet = totalAmountPNet
+      console.log(this.orderW)
     }
   }
 }

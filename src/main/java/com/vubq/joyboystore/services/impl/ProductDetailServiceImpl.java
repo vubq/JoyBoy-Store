@@ -219,4 +219,9 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     public List<ProductDetail> getAllByIdIn(List<String> idIn) {
         return this.productDetailRepository.getAllByIdIn(idIn);
     }
+
+    @Override
+    public List<ProductDetail> getAllProductDetailView(String productId) {
+        return this.productDetailRepository.getAllProductDetailView(productId);
+    }
 }

@@ -115,7 +115,7 @@
 
               <!-- Button add to cart -->
               <div slot="reference">
-                <el-badge :value="cart.length" class="item">
+                <el-badge :value="genTotalSP()" class="item">
                   <i class="el-icon-shopping-cart-full" style="cursor: pointer;" />
                 </el-badge>
               </div>
@@ -218,6 +218,9 @@ export default {
         this.$router.push(`/shop/login?redirect=${this.$route.fullPath}`)
       }
     },
+    genTotalSP() {
+      return this.cart.reduce((sum, od) => sum + Number(od.quantity), 0)
+    },
     pushSearchProduct() {
       this.$router.push({
         name: 'filter-product',
@@ -285,10 +288,23 @@ export default {
       })
     },
     pay() {
-      this.showCart = false
-      this.$router.push({
-        path: '/shop/pay'
-      })
+      if (!this.isCustomer) {
+        this.$confirm('Để tiến hành mua hàng, bạn cần đăng nhập?', 'Thông báo.', {
+          confirmButtonText: 'Đăng nhập',
+          cancelButtonText: 'Hủy',
+          type: 'warning'
+        }).then(() => {
+          this.showCart = false
+          this.$router.push({
+            path: '/shop/pay'
+          })
+        })
+      } else {
+        this.showCart = false
+        this.$router.push({
+          path: '/shop/pay'
+        })
+      }
     },
     toHome() {
       this.$router.push({

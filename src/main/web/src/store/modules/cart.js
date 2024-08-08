@@ -5,6 +5,7 @@ const REMOVE_PRODUCT_TO_CART = 'REMOVE_PRODUCT_TO_CART'
 const CLEAR_CART = 'CLEAR_CART'
 const SET_PAY = 'SET_PAY'
 const SET_ORDER = 'SET_ORDER'
+const SET_ORDER_W = 'SET_ORDER_W'
 
 const cart = {
   state: {
@@ -52,15 +53,14 @@ const cart = {
       voucher: null,
       moneyPaid: 0,
       moneyRefunds: 0
-    }
+    },
+    orderWStore: loadFromLocal('orderWStore', '') || {}
   },
   mutations: {
     [ADD_PRODUCT_TO_CART](state, productDetail) {
-      const pd = state.cart.find(e => e.productDetailId === productDetail.productDetailId)
-      if (pd) {
-        state.cart = state.cart.map(e => {
-          return { ...e, quantity: productDetail.quantity }
-        })
+      const i = state.cart.findIndex(e => e.productDetailId === productDetail.productDetailId)
+      if (i !== -1) {
+        state.cart[i].quantity = Number(state.cart[i].quantity) + Number(productDetail.quantity)
       } else {
         state.cart.push(productDetail)
       }
@@ -127,6 +127,10 @@ const cart = {
     [SET_ORDER](state, order) {
       state.order = order
       saveToLocal('order', state.order)
+    },
+    [SET_ORDER_W](state, order) {
+      state.orderWStore = order
+      saveToLocal('orderWStore', state.orderWStore)
     }
   },
   actions: {
@@ -159,12 +163,19 @@ const cart = {
         commit(SET_PAY, order)
         return resolve()
       })
+    },
+    setOrderW({ commit }, order) {
+      return new Promise((resolve, reject) => {
+        commit(SET_ORDER_W, order)
+        return resolve()
+      })
     }
   },
   getters: {
     cart: state => state.cart,
     pay: state => state.pay,
-    order: state => state.order
+    order: state => state.order,
+    orderWStore: state => state.orderWStore
   }
 }
 

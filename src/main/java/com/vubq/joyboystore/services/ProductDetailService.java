@@ -58,4 +58,6 @@ public interface ProductDetailService {
     List<ProductDetail> getAllByByStatusActiveAndQuantityGreaterThan0AndSearchBy(String searchBy);
 
     List<ProductDetail> getAllByIdIn(List<String> idIn);
+
+    List<ProductDetail> getAllProductDetailView(String productId);
 }

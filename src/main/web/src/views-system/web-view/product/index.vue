@@ -1,16 +1,16 @@
 <template>
   <div>
     <div style="font-size: 12px; margin-bottom: 10px;">TRANG CHỦ</div>
-    <div>
+    <div v-if="product">
       <div class="tag-product">
         <el-row :gutter="60">
           <el-col :span="10">
-            <el-image style="width: 100%;" :src="listImage[0]" />
+            <el-image style="width: 100%; border: 1px solid #e5e5e5;" :src="product.listImage[0]" />
           </el-col>
 
           <el-col :span="14">
             <div style="font-size: 16px; font-weight: bold;">
-              {{ product ? product.name : '' }}
+              {{ product.name }}
             </div>
 
             <div style="margin-top: 10px; display: flex; align-items: center; font-size: 14px;">
@@ -27,22 +27,26 @@
             </div>
 
             <div style="margin-top: 10px; font-size: 18px; font-weight: bold;">
-              <div v-if="pd">
-                <span style="color: #ee4d2d;">{{ formatCurrencyVND(pd.priceNet) }}</span>
-                <span v-if="pd.price > pd.priceNet" style="text-decoration: line-through; color: rgba(0,0,0,.26); margin-left: 10px; font-size: 16px;">{{ formatCurrencyVND(pd.price) }}</span>
+              <div v-if="productDetail">
+                <span style="color: #ee4d2d;">{{ formatCurrencyVND(productDetail.priceNet) }}</span>
+                <span v-if="productDetail.price > productDetail.priceNet" style="text-decoration: line-through; color: rgba(0,0,0,.26); margin-left: 10px; font-size: 16px;">{{ formatCurrencyVND(productDetail.price) }}</span>
               </div>
 
               <div v-else>
-                <span style="color: #ee4d2d;">{{ formatCurrencyVND(product ? product.priceNet : 0) }}</span>
-                <span v-if="product.price > product.priceNet" style="text-decoration: line-through; color: rgba(0,0,0,.26); margin-left: 10px; font-size: 16px;">{{ formatCurrencyVND(product ? product.price : 0) }}</span>
+                <span style="color: #ee4d2d;">{{ formatCurrencyVND(product.priceNet) }}</span>
+                <span v-if="product.price > product.priceNet" style="text-decoration: line-through; color: rgba(0,0,0,.26); margin-left: 10px; font-size: 16px;">{{ formatCurrencyVND(product.price) }}</span>
               </div>
             </div>
 
             <div style="margin-top: 20px;">
               <span style="font-size: 14px;">Kích cỡ:</span>
               <div style="display: flex; margin-top: 5px; font-size: 14px;">
-                <div v-for="(s, i) in sizes" :key="s.id">
-                  <div style="margin-right: 10px;" :class="[sizeSelected === s.id ? 'tag tag-active' : 'tag', s.isOutOfStock || !genIsOutOfStockSize(s.id) ? 'tag-disable' : '']" @click="changeSizeSelected(s.id, s.isOutOfStock)">
+                <div v-for="s in listSize" :key="s.id">
+                  <div
+                    style="margin-right: 10px;"
+                    :class="'tag ' + (sizeId === s.id ? 'tag-active' : '')"
+                    @click="selectVariant(s.id, 'size')"
+                  >
                     {{ s.name }}
                   </div>
                 </div>
@@ -52,8 +56,12 @@
             <div style="margin-top: 10px;">
               <span style="font-size: 14px;">Màu sắc:</span>
               <div style="display: flex; margin-top: 5px; font-size: 14px;">
-                <div v-for="(c, i) in colors" :key="c.id">
-                  <div style="margin-right: 10px;" :class="[colorSelected === c.id ? 'tag tag-active' : 'tag', c.isOutOfStock || !genIsOutOfStockColor(c.id) ? 'tag-disable' : '']" class="''" @click="changeColorSelected(c.id, c.isOutOfStock)">
+                <div v-for="c in listColor" :key="c.id">
+                  <div
+                    style="margin-right: 10px;"
+                    :class="'tag ' + (colorId === c.id ? 'tag-active' : '')"
+                    @click="selectVariant(c.id, 'color')"
+                  >
                     {{ c.name }}
                   </div>
                 </div>
@@ -63,8 +71,12 @@
             <div style="margin-top: 10px;">
               <span style="font-size: 14px;">Chất Liệu:</span>
               <div style="display: flex; margin-top: 5px; font-size: 14px;">
-                <div v-for="(m, i) in materials" :key="m.id">
-                  <div style="margin-right: 10px;" :class="[materialSelected === m.id ? 'tag tag-active' : 'tag', m.isOutOfStock || !genIsOutOfStockMaterial(m.id) ? 'tag-disable' : '']" @click="changeMaterialSelected(m.id, m.isOutOfStock)">
+                <div v-for="m in listMaterial" :key="m.id">
+                  <div
+                    style="margin-right: 10px;"
+                    :class="'tag ' + (materialId === m.id ? 'tag-active' : '')"
+                    @click="selectVariant(m.id, 'material')"
+                  >
                     {{ m.name }}
                   </div>
                 </div>
@@ -96,7 +108,7 @@
                   >
                     <i class="el-icon-plus" />
                   </el-button>
-                  <span style="margin-left: 20px; font-size: 14px;">{{ totalProductsAvailable }} sản phẩm có sẵn</span>
+                  <span style="margin-left: 20px; font-size: 14px;">{{ totalQuantity }} sản phẩm có sẵn</span>
                 </div>
               </div>
             </div>
@@ -114,8 +126,8 @@
 </template>
 
 <script>
-import { productGetProductViewById, getProductByIdWebShop } from '@/api/product'
-import { filterProductAttributes, getProductDetailByAttributes } from '@/api/product-detail'
+import { productGetAllProductDetailView } from '@/api/product'
+import { getProductDetailByAttributes } from '@/api/product-detail'
 import { ResponseCode } from '@/enums/enums'
 import { formatCurrencyVND } from '@/utils/format'
 import moment from 'moment'
@@ -129,55 +141,58 @@ export default {
       formatCurrencyVND: formatCurrencyVND,
       Moment: moment,
       productId: this.$route.params.id ? this.$route.params.id : '',
-      product: null,
-      listImage: [],
-      sizes: [],
-      colors: [],
-      materials: [],
-      listOfAvailableSizes: [],
-      listOfAvailableColors: [],
-      listOfAvailableMaterials: [],
-      listOfDisableSizes: [],
-      listOfDisableColors: [],
-      listOfDisableMaterials: [],
-      colorSelected: '',
-      sizeSelected: '',
-      materialSelected: '',
-      totalProductsAvailable: 0,
-      quantityPurchased: 1,
       listOfFeedbacks: [],
-      pd: null
+      product: null,
+      listProductDetail: [],
+      productDetail: null,
+      listSize: [],
+      listColor: [],
+      listMaterial: [],
+      listSizeActive: [],
+      listColorActive: [],
+      listMaterialActive: [],
+      sizeId: '',
+      colorId: '',
+      materialId: '',
+      totalQuantity: 0,
+      quantityPurchased: 1,
+      maxPrice: 0,
+      minPrice: 0
     }
   },
   watch: {
   },
-  created() {
+  async created() {
     if (this.productId) {
-      getProductByIdWebShop(this.productId)
-        .then(res => {
-          if (res && res.code === ResponseCode.CODE_SUCCESS) {
-            this.product = res.data
-            this.listImage = res.data.listImage
-            this.sizes = res.data.sizes
-            this.colors = res.data.colors
-            this.materials = res.data.materials
-            this.totalProductsAvailable = res.data.totalProductsAvailable
-          }
-        })
+      await productGetAllProductDetailView(this.productId).then((res) => {
+        if (res && res.code === ResponseCode.CODE_SUCCESS) {
+          this.product = res.data
+          this.listProductDetail = res.data.listProductDetail
+
+          res.data.listProductDetail.forEach(async(pd) => {
+            if (!this.listSize.find((x) => x.id === pd.size.id)) {
+              this.listSize.push(pd.size)
+              // this.listSizeActive.push(pd.size)
+            }
+
+            if (!this.listColor.find((x) => x.id === pd.color.id)) {
+              this.listColor.push(pd.color)
+              // this.listColorActive.push(pd.color)
+            }
+
+            if (!this.listMaterial.find((x) => x.id === pd.material.id)) {
+              this.listMaterial.push(pd.material)
+              // this.listMaterialActive.push(pd.material)
+            }
+
+            this.totalQuantity += pd.quantity
+          })
+
+          this.maxPrice = res.data.listProductDetail.reduce((max, item) => item.priceNet > max.priceNet ? item : max)
+          this.minPrice = res.data.listProductDetail.reduce((min, item) => item.priceNet < min.priceNet ? item : min)
+        }
+      })
     }
-    // getListOfFeedbacksByCriteria({
-    //   currentPage: 1,
-    //   perPage: 10,
-    //   filter: '',
-    //   sortBy: '',
-    //   sortDesc: true,
-    //   productId: this.productId,
-    //   rate: null
-    // }).then(res => {
-    //   if(res.data && res.data.code === ResponseCode.CODE_SUCCESS) {
-    //     this.listOfFeedbacks = res.data.items
-    //   }
-    // })
   },
   mounted() {
   },
@@ -187,91 +202,81 @@ export default {
     ...mapActions([
       'addProductToCart'
     ]),
-    changeSizeSelected(id, isOutOfStock) {
-      if (!isOutOfStock && this.genIsOutOfStockSize(id)) {
-        if (id === this.sizeSelected) {
-          this.sizeSelected = ''
-        } else {
-          this.sizeSelected = id
-        }
-        this.filterAttributes()
+    selectVariant(id, variant) {
+      // const s = []
+      // const c = []
+      // const m = []
+      this.totalQuantity = 0
+
+      if (variant === 'size') {
+        this.sizeId = this.sizeId === id ? '' : id
+        // if (this.productDetail.sizeId) {
+        //   s.push({ id: this.productDetail.sizeId })
+        // }
       }
-    },
-    changeColorSelected(id, isOutOfStock) {
-      if (!isOutOfStock && this.genIsOutOfStockColor(id)) {
-        if (id === this.colorSelected) {
-          this.colorSelected = ''
-        } else {
-          this.colorSelected = id
-        }
-        this.filterAttributes()
+
+      if (variant === 'color') {
+        this.colorId = this.colorId === id ? '' : id
+        // if (this.productDetail.colorId) {
+        //   c.push({ id: this.productDetail.colorId })
+        // }
       }
-    },
-    changeMaterialSelected(id, isOutOfStock) {
-      if (!isOutOfStock && this.genIsOutOfStockMaterial(id)) {
-        if (id === this.materialSelected) {
-          this.materialSelected = ''
-        } else {
-          this.materialSelected = id
-        }
-        this.filterAttributes()
+
+      if (variant === 'material') {
+        this.materialId = this.materialId === id ? '' : id
+        // if (this.productDetail.materialId) {
+        //   m.push({ id: this.productDetail.materialId })
+        // }
       }
-    },
-    async filterAttributes() {
-      await filterProductAttributes({
-        productId: this.productId,
-        sizeId: this.sizeSelected,
-        colorId: this.colorSelected,
-        materialId: this.materialSelected
-      }).then(async res => {
-        if (res && res.code === ResponseCode.CODE_SUCCESS) {
-          if (!this.sizeSelected) {
-            this.listOfDisableSizes = this.sizes.map(e => e.id)
-            res.data.listOfAvailableSizes.forEach(e => {
-              this.listOfDisableSizes = this.listOfDisableSizes.filter(x => x !== e)
-            })
-          }
-          if (!this.colorSelected) {
-            this.listOfDisableColors = this.colors.map(e => e.id)
-            res.data.listOfAvailableColors.forEach(e => {
-              this.listOfDisableColors = this.listOfDisableColors.filter(x => x !== e)
-            })
-          }
-          if (!this.materialSelected) {
-            this.listOfDisableMaterials = this.materials.map(e => e.id)
-            res.data.listOfAvailableMaterials.forEach(e => {
-              this.listOfDisableMaterials = this.listOfDisableMaterials.filter(x => x !== e)
-            })
-          }
-          if (this.sizeSelected && this.colorSelected && this.materialSelected) {
-            //
-          }
-          this.totalProductsAvailable = res.data.totalProductsAvailable
-        }
+
+      const list = this.listProductDetail.filter((pd) =>
+        (pd.size.id === this.sizeId || this.sizeId === '') &&
+        (pd.color.id === this.colorId || this.colorId === '') &&
+        (pd.material.id === this.materialId || this.materialId === '')
+      )
+      list.forEach((pd) => {
+        // if (!s.find((x) => x.id === pd.size.id)) {
+        //   s.push(pd.size)
+        // }
+
+        // if (!c.find((x) => x.id === pd.color.id)) {
+        //   c.push(pd.color)
+        // }
+
+        // if (!m.find((x) => x.id === pd.material.id)) {
+        //   m.push(pd.material)
+        // }
+
+        this.totalQuantity += pd.quantity
       })
-      await this.loadImageAndPrice()
-    },
-    genIsOutOfStockSize(id) {
-      return !this.listOfDisableSizes.find(e => e === id)
-    },
-    genIsOutOfStockColor(id) {
-      return !this.listOfDisableColors.find(e => e === id)
-    },
-    genIsOutOfStockMaterial(id) {
-      return !this.listOfDisableMaterials.find(e => e === id)
+
+      if (this.materialId && this.sizeId && this.colorId && list.length === 1) {
+        this.productDetail = list[0]
+      } else {
+        this.productDetail = null
+      }
+      // this.listSizeActive = s
+      // this.listColorActive = c
+      // this.listMaterialActive = m
     },
     addToCart() {
-      if (this.sizeSelected && this.colorSelected && this.materialSelected) {
+      if (this.sizeId && this.colorId && this.materialId) {
         getProductDetailByAttributes({
           productId: this.productId,
-          sizeId: this.sizeSelected,
-          colorId: this.colorSelected,
-          materialId: this.materialSelected
+          sizeId: this.sizeId,
+          colorId: this.colorId,
+          materialId: this.materialId
         }).then(res => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
             this.addProductToCart({
               productDetailId: res.data.id,
               quantity: this.quantityPurchased
+            })
+            this.$notify({
+              title: 'Thông báo.',
+              message: 'Sản phẩm đã được thêm vào giỏ hàng.',
+              type: 'success',
+              offset: 100
             })
           }
         })

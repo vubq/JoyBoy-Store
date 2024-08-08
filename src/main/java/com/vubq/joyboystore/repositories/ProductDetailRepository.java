@@ -60,4 +60,11 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, St
 
     @Query(value = "SELECT pd FROM ProductDetail pd WHERE pd.id IN :idIn")
     List<ProductDetail> getAllByIdIn(List<String> idIn);
+
+    @Query(value = "SELECT pd FROM ProductDetail pd " +
+            "WHERE pd.product.id = :productId " +
+            "AND pd.status = com.vubq.joyboystore.enums.EStatus.ACTIVE " +
+            "AND pd.product.status = com.vubq.joyboystore.enums.EStatus.ACTIVE " +
+            "AND pd.quantity > 0")
+    List<ProductDetail> getAllProductDetailView(String productId);
 }

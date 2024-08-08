@@ -48,6 +48,15 @@ public class User {
     @Column(name = "district")
     private String district;
 
+    @Column(name = "ward_code")
+    private String wardCode;
+
+    @Column(name = "city_code")
+    private String cityCode;
+
+    @Column(name = "district_code")
+    private String districtCode;
+
     @Column(name = "ward")
     private String ward;
 

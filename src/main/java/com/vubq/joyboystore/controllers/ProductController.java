@@ -444,61 +444,61 @@ public class ProductController extends BaseController {
         return Response.build().ok().data(listProductWebViewDto);
     }
 
-    @GetMapping("get-product-view-by-id/{id}")
+    @GetMapping("get-all-product-detail-view/{id}")
     public Response getProductViewById(@PathVariable String id) {
-        Product p = this.productService.getById(id);
-            ProductWebViewDto productWebViewDto = ProductWebViewDto.builder()
-                    .id(p.getId())
-                    .name(p.getName())
-                    .description(p.getDescription())
-                    .price(p.getPrice())
-                    .priceNet(p.getPriceNet())
-                    .category(
-                            CategoryDto.builder()
-                                    .id(p.getCategory().getId())
-                                    .name(p.getCategory().getName())
+        Product product = this.productService.getById(id);
+        ProductWebViewDto productWebViewDto = ProductWebViewDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .priceNet(product.getPriceNet())
+                .category(
+                        CategoryDto.builder()
+                                .id(product.getCategory().getId())
+                                .name(product.getCategory().getName())
+                                .build()
+                )
+                .brand(
+                        BrandDto.builder()
+                                .id(product.getBrand().getId())
+                                .name(product.getBrand().getName())
+                                .build()
+                )
+                .rate(this.feedbackService.getRateProduct(product.getId()))
+                .listImage(this.imageService.getAllUrlBySecondaryId(product.getId()))
+                .build();
+        List<ProductDetail> listProductDetail = this.productDetailService.getAllProductDetailView(id);
+        List<ProductDetailWebViewDto> listProductDetailWebViewDto = new ArrayList<>();
+        listProductDetail.forEach(pd -> {
+            ProductDetailWebViewDto productDetailWebViewDto = ProductDetailWebViewDto.builder()
+                    .id(pd.getId())
+                    .price(pd.getPrice())
+                    .priceNet(pd.getPriceNet())
+                    .quantity(pd.getQuantity())
+                    .size(
+                            SizeDto.builder()
+                                    .id(pd.getSize().getId())
+                                    .name(pd.getSize().getName())
                                     .build()
                     )
-                    .brand(
-                            BrandDto.builder()
-                                    .id(p.getBrand().getId())
-                                    .name(p.getBrand().getName())
+                    .color(
+                            ColorDto.builder()
+                                    .id(pd.getColor().getId())
+                                    .name(pd.getColor().getName())
                                     .build()
                     )
-                    .rate(this.feedbackService.getRateProduct(p.getId()))
-                    .listImage(this.imageService.getAllUrlBySecondaryId(p.getId()))
+                    .material(
+                            MaterialDto.builder()
+                                    .id(pd.getMaterial().getId())
+                                    .name(pd.getMaterial().getName())
+                                    .build()
+                    )
+                    .listImage(this.imageService.getAllUrlBySecondaryId(pd.getId()))
                     .build();
-            List<ProductDetail> listProductDetail = this.productDetailService.getAllByProductId(p.getId());
-            List<ProductDetailWebViewDto> listProductDetailWebViewDto = new ArrayList<>();
-            listProductDetail.forEach(pd -> {
-                ProductDetailWebViewDto productDetailWebViewDto = ProductDetailWebViewDto.builder()
-                        .id(pd.getId())
-                        .price(pd.getPrice())
-                        .priceNet(pd.getPriceNet())
-                        .quantity(pd.getQuantity())
-                        .size(
-                                SizeDto.builder()
-                                        .id(pd.getSize().getId())
-                                        .name(pd.getSize().getName())
-                                        .build()
-                        )
-                        .color(
-                                ColorDto.builder()
-                                        .id(pd.getColor().getId())
-                                        .name(pd.getColor().getName())
-                                        .build()
-                        )
-                        .material(
-                                MaterialDto.builder()
-                                        .id(pd.getMaterial().getId())
-                                        .name(pd.getMaterial().getName())
-                                        .build()
-                        )
-                        .listImage(this.imageService.getAllUrlBySecondaryId(pd.getId()))
-                        .build();
-                listProductDetailWebViewDto.add(productDetailWebViewDto);
-            });
-            productWebViewDto.setListProductDetail(listProductDetailWebViewDto);
+            listProductDetailWebViewDto.add(productDetailWebViewDto);
+        });
+        productWebViewDto.setListProductDetail(listProductDetailWebViewDto);
         return Response.build().ok().data(productWebViewDto);
     }
 
