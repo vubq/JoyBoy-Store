@@ -20,3 +20,11 @@ export const orderOnline = (data) =>
     method: 'post',
     data
   })
+
+export const orderGetAllPageOnline = (params) =>
+  request({
+    url: '/order/get-all-page-online',
+    method: 'get',
+    params
+  })
+

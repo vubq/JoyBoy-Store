@@ -2,6 +2,9 @@ package com.vubq.joyboystore.services;
 
 import com.vubq.joyboystore.dtos.HistoryCustomerDto;
 import com.vubq.joyboystore.entities.Order;
+import com.vubq.joyboystore.entities.Voucher;
+import com.vubq.joyboystore.enums.EOrderStatus;
+import com.vubq.joyboystore.enums.EOrderType;
 import com.vubq.joyboystore.utils.DataTableRequest;
 import org.springframework.data.domain.Page;
 
@@ -27,4 +30,6 @@ public interface OrderService {
     List<Order> getAllOrderByUserId(String userId);
 
     List<HistoryCustomerDto> getHistoryCustomer(String fullNameCustomer);
+
+    Page<Order> getAllPage(DataTableRequest request, String status, String dateFrom, String dateTo, EOrderType type);
 }

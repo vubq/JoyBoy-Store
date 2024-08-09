@@ -2,6 +2,8 @@ package com.vubq.joyboystore.services.impl;
 
 import com.vubq.joyboystore.dtos.HistoryCustomerDto;
 import com.vubq.joyboystore.entities.Order;
+import com.vubq.joyboystore.entities.Voucher;
+import com.vubq.joyboystore.enums.EOrderStatus;
 import com.vubq.joyboystore.enums.EOrderType;
 import com.vubq.joyboystore.repositories.OrderRepository;
 import com.vubq.joyboystore.services.OrderService;
@@ -122,5 +124,55 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<HistoryCustomerDto> getHistoryCustomer(String fullNameCustomer) {
         return this.orderRepository.getHistoryCustomer(fullNameCustomer);
+    }
+
+    @Override
+    public Page<Order> getAllPage(DataTableRequest request, String status, String dateFrom, String dateTo, EOrderType type) {
+        PageRequest pageable = request.toPageable();
+        BaseSpecification<Order> specFullNameCustomerContains = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.fullName})
+                        .operation(SearchOperation.CONTAINS)
+                        .value(request.getFilter().trim().toUpperCase())
+                        .build());
+        BaseSpecification<Order> specPhoneNumberContains = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.phoneNumber})
+                        .operation(SearchOperation.CONTAINS)
+                        .value(request.getFilter().trim().toUpperCase())
+                        .build());
+        BaseSpecification<Order> specTypeEquality = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.type})
+                        .operation(SearchOperation.EQUALITY)
+                        .value(type)
+                        .build());
+        BaseSpecification<Order> specDateFromGreaterThanOrEqual = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.createdAt})
+                        .operation(SearchOperation.GREATER_THAN_OR_EQUAL)
+                        .value(dateFrom + " 00:00:00.000")
+                        .build());
+        BaseSpecification<Order> specDateToLessThanOrEqual = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.createdAt})
+                        .operation(SearchOperation.LESS_THAN_OR_EQUAL)
+                        .value(dateTo + " 23:59:59.999")
+                        .build());
+        BaseSpecification<Order> specStatus = new BaseSpecification<>(
+                SearchCriteria.builder()
+                        .keys(new String[]{Order.Fields.status})
+                        .operation(SearchOperation.EQUALITY)
+                        .value(status)
+                        .build());
+        return this.orderRepository.findAll(
+                Specification
+                        .where(specFullNameCustomerContains)
+                        .or(specPhoneNumberContains)
+                        .and(specTypeEquality)
+                        .and(specDateFromGreaterThanOrEqual)
+                        .and(specDateToLessThanOrEqual)
+                        .and(status.equals("ALL") ? null : specStatus)
+                , pageable);
     }
 }

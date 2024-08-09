@@ -270,6 +270,30 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/admin/order-management',
+    component: Layout,
+    redirect: '/admin/order-management/order-online/list-online',
+    name: 'order-management',
+    meta: {
+      title: 'Quản lý Đơn hàng',
+      icon: 'component'
+    },
+    children: [
+      {
+        path: 'list-online',
+        component: () => import('@/views-system/cms/order-management/online/index.vue'),
+        name: 'order-online-management-list-page',
+        meta: { title: 'Online', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
+      },
+      {
+        path: 'list-at-the-shop',
+        component: () => import('@/views-system/cms/order-management/online/index.vue'),
+        name: 'order-at-the-shop-management-list-page',
+        meta: { title: 'Tại cửa hàng', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
+      }
+    ]
+  },
 
   // {
   //   path: '/admin/user-management',

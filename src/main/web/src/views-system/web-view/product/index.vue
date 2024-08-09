@@ -261,24 +261,49 @@ export default {
     },
     addToCart() {
       if (this.sizeId && this.colorId && this.materialId) {
-        getProductDetailByAttributes({
-          productId: this.productId,
-          sizeId: this.sizeId,
-          colorId: this.colorId,
-          materialId: this.materialId
-        }).then(res => {
-          if (res && res.code === ResponseCode.CODE_SUCCESS) {
-            this.addProductToCart({
-              productDetailId: res.data.id,
-              quantity: this.quantityPurchased
-            })
-            this.$notify({
-              title: 'Thông báo.',
-              message: 'Sản phẩm đã được thêm vào giỏ hàng.',
-              type: 'success',
-              offset: 100
-            })
-          }
+        if (this.quantityPurchased <= 0) {
+          this.$notify({
+            title: 'Cảnh báo.',
+            message: 'Chọn số lượng sản phẩm.',
+            type: 'error',
+            offset: 100
+          })
+          return
+        }
+        if (this.quantityPurchased > this.totalQuantity) {
+          this.$notify({
+            title: 'Cảnh báo.',
+            message: 'Số lượng sản phẩm còn lại không đủ.',
+            type: 'error',
+            offset: 100
+          })
+        } else {
+          getProductDetailByAttributes({
+            productId: this.productId,
+            sizeId: this.sizeId,
+            colorId: this.colorId,
+            materialId: this.materialId
+          }).then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.addProductToCart({
+                productDetailId: res.data.id,
+                quantity: this.quantityPurchased
+              })
+              this.$notify({
+                title: 'Thông báo.',
+                message: 'Sản phẩm đã được thêm vào giỏ hàng.',
+                type: 'success',
+                offset: 100
+              })
+            }
+          })
+        }
+      } else {
+        this.$notify({
+          title: 'Cảnh báo.',
+          message: 'Bạn cần chọn các thuộc tính của sản phẩm.',
+          type: 'error',
+          offset: 100
         })
       }
     },

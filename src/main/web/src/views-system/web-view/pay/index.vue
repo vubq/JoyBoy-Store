@@ -451,42 +451,48 @@ export default {
       }
     },
     payment() {
-      if (this.orderW.paymentType === 'PAYMENT_ONLINE') {
-        paymentOnline({
-          id: this.userId,
-          money: this.orderW.totalAmountNet,
-          bankCode: '',
-          billMobile: this.orderW.phoneNumber,
-          billEmail: this.orderW.email,
-          fullname: this.orderW.fullName,
-          billAddress: this.orderW.address,
-          billCity: '',
-          billCountry: '',
-          billState: ''
-        }).then(res => {
-          if (res && res.code === ResponseCode.CODE_SUCCESS) {
-            this.setOrderW(this.orderW)
-            window.location.replace(res.data)
-          }
-        })
-      } else {
-        this.orderW.district = this.listDistrict.find((e) => e.district_id === this.districtCode).district_name
-        this.orderW.ward = this.listWard.find((e) => e.ward_id === this.wardCode).ward_name
-        this.orderW.city = this.listCity.find((e) => e.province_id === this.cityCode).province_name
-        orderOnline(this.orderW).then(res => {
-          if (res && res.code === ResponseCode.CODE_SUCCESS) {
-            this.clearCart()
-            this.$notify({
-              title: 'Success',
-              message: 'Đặt hàng thành công.',
-              type: 'success'
-            })
-            this.$router.push({
-              path: '/shop'
-            })
-          }
-        })
-      }
+      this.$confirm('Bạn xác nhận đặt hàng?', 'Xác nhận.', {
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        type: 'warning'
+      }).then(() => {
+        if (this.orderW.paymentType === 'PAYMENT_ONLINE') {
+          paymentOnline({
+            id: this.userId,
+            money: this.orderW.totalAmountNet,
+            bankCode: '',
+            billMobile: this.orderW.phoneNumber,
+            billEmail: this.orderW.email,
+            fullname: this.orderW.fullName,
+            billAddress: this.orderW.address,
+            billCity: '',
+            billCountry: '',
+            billState: ''
+          }).then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.setOrderW(this.orderW)
+              window.location.replace(res.data)
+            }
+          })
+        } else {
+          this.orderW.district = this.listDistrict.find((e) => e.district_id === this.districtCode).district_name
+          this.orderW.ward = this.listWard.find((e) => e.ward_id === this.wardCode).ward_name
+          this.orderW.city = this.listCity.find((e) => e.province_id === this.cityCode).province_name
+          orderOnline(this.orderW).then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.clearCart()
+              this.$notify({
+                title: 'Success',
+                message: 'Đặt hàng thành công.',
+                type: 'success'
+              })
+              this.$router.push({
+                path: '/shop'
+              })
+            }
+          })
+        }
+      })
     },
     changePay() {
       this.setPay({

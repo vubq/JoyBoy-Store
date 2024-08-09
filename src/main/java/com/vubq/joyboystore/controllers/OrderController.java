@@ -10,9 +10,12 @@ import com.vubq.joyboystore.services.OrderDetailService;
 import com.vubq.joyboystore.services.OrderService;
 import com.vubq.joyboystore.services.ProductDetailService;
 import com.vubq.joyboystore.services.VoucherService;
+import com.vubq.joyboystore.utils.DataTableRequest;
+import com.vubq.joyboystore.utils.DataTableResponse;
 import com.vubq.joyboystore.utils.Response;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -98,7 +101,9 @@ public class OrderController extends BaseController {
         }
 
         Order order = this.orderService.save(orderNew);
-        this.voucherService.save(voucher);
+        if(voucher != null) {
+            this.voucherService.save(voucher);
+        }
         listOrderDetail.forEach(od -> od.setOrder(order));
         this.orderDetailService.saveAll(listOrderDetail);
         this.productDetailService.saveAll(listProductDetail);
@@ -106,6 +111,7 @@ public class OrderController extends BaseController {
     }
 
     @PostMapping("order-online")
+    @Transactional
     public Response orderOnline(@RequestBody OrderSATCDto dto) {
         Order orderNew = Order.builder()
                 .fullName(dto.getFullName())
@@ -158,9 +164,26 @@ public class OrderController extends BaseController {
         }
 
         Order order = this.orderService.save(orderNew);
-        this.voucherService.save(voucher);
+        if(voucher != null) {
+            this.voucherService.save(voucher);
+        }
         listOrderDetail.forEach(od -> od.setOrder(order));
         this.orderDetailService.saveAll(listOrderDetail);
         return Response.build().ok();
+    }
+
+    @GetMapping("get-all-page-online")
+    public DataTableResponse getAllPage(
+            DataTableRequest request,
+            @RequestParam String status,
+            @RequestParam String dateFrom,
+            @RequestParam String dateTo
+    ) {
+        Page<Order> result = this.orderService.getAllPage(request, status, dateFrom, dateTo, EOrderType.ONLINE);
+
+        return DataTableResponse.build()
+                .ok()
+                .totalRows(result.getTotalElements())
+                .items(result.get().toList());
     }
 }
