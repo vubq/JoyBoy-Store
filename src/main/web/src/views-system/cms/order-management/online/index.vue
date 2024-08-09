@@ -136,8 +136,8 @@
 
         <el-table-column fixed="right" label="" align="center" width="150">
           <template slot-scope="{row}">
-            <el-button type="primary" size="small" plain>
-              <i class="el-icon-warning" @click="showDetail(row.id)" />
+            <el-button type="primary" size="small" plain @click="showDetail(row.id)">
+              <i class="el-icon-warning" />
             </el-button>
           </template>
         </el-table-column>
@@ -146,19 +146,113 @@
       <pagination v-show="total>0" :total="total" :page.sync="listQuery.currentPage" :limit.sync="listQuery.perPage" @pagination="getList" />
 
       <el-dialog
-        width="30%"
+        v-if="odDetail"
+        width="80%"
         title="Chi tiết"
         :visible.sync="dialogFormVisible"
         :close-on-click-modal="false"
         @closed="closeModal()"
       >
-        cccc
+        <el-row :gutter="40">
+          <el-col :span="6">
+            <div>Khách hàng: {{ odDetail.order.fullName }}</div>
+            <div style="margin-top: 20px;">SĐT: {{ odDetail.order.phoneNumber }}</div>
+            <div style="margin-top: 20px;">Email: {{ odDetail.order.email }}</div>
+            <div style="margin-top: 20px;">Địa chỉ: {{ odDetail.order.address + ', ' + odDetail.order.district + ' - ' + odDetail.order.ward + ' - ' + odDetail.order.city }}</div>
+          </el-col>
+          <el-col :span="6">
+            <div>Mã HĐ: {{ odDetail.order.id }}</div>
+            <div style="margin-top: 20px;">Tổng tiền gốc: {{ formatCurrencyVND(odDetail.order.totalAmount) }}</div>
+            <div v-if="odDetail.voucher" style="margin-top: 20px;">Mã giảm giá: {{ odDetail.voucher.code }} <span>({{ odDetail.voucher.type === 'PERCENT' ? odDetail.voucher.value + '% - tối đa ' + formatCurrencyVND(odDetail.voucher.max) : formatCurrencyVND(odDetail.voucher.value) }})</span></div>
+            <div style="margin-top: 20px;">Giảm giá: {{ formatCurrencyVND(odDetail.order.totalAmount - odDetail.order.totalAmountNet) }}</div>
+            <div style="margin-top: 20px;">Tổng tiền: {{ formatCurrencyVND(odDetail.order.totalAmountNet) }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div style="display: flex; justify-content: center;">
+              Trạng thái đơn hàng
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+              <el-timeline :reverse="true">
+                <el-timeline-item
+                  v-for="(h, index) in odDetail.listHistoryOrder"
+                  :key="index"
+                  :timestamp="moment(h.createdAt).format('HH:mm:ss DD-MM-YYYY')"
+                >
+                  <span v-if="h.status === 'WAIT_FOR_CONFIRMATION'">
+                    <el-tag type="warning" size="small">Chờ xác nhận</el-tag>
+                  </span>
+                  <span v-if="h.status === 'PREPARING_GOODS'">
+                    <el-tag type="warning" size="small">Chuẩn bị hàng</el-tag>
+                  </span>
+                  <span v-if="h.status === 'DELIVERING'">
+                    <el-tag type="warning" size="small">Đang giao hàng</el-tag>
+                  </span>
+                  <span v-if="h.status === 'DELIVERED'">
+                    <el-tag type="warning" size="small">Đã giao hàng</el-tag>
+                  </span>
+                  <span v-if="h.status === 'SUCCESS'">
+                    <el-tag type="success" size="small">Thành công</el-tag>
+                  </span>
+                  <span v-if="h.status === 'CANCELLED'">
+                    <el-tag type="danger" size="small">Đã hủy</el-tag>
+                  </span>
+                </el-timeline-item>
+              </el-timeline>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-table
+          :key="tableKey"
+          v-loading="isLoadingModal"
+          :data="odDetail.listOrderDetail"
+          :header-cell-style="{ background: '#f5f7fa' }"
+          border
+          style="margin-top: 20px;"
+        >
+          <el-table-column align="center" width="50">
+            <template slot-scope="scope">
+              <span>#{{ scope.$index + 1 }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="Sản phẩm" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.productDetail.product.name }} ({{ row.productDetail.size.name }} - {{ row.productDetail.color.name }} - {{ row.productDetail.material.name }})</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="SL" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.quantity }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="Đơn giá" align="center">
+            <template slot-scope="{row}">
+              {{ formatCurrencyVND(row.productDetailPriceNet) }} <span v-if="row.productDetailPrice > row.productDetailPriceNet" style="text-decoration: line-through;">({{ formatCurrencyVND(row.productDetailPrice) }})</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column :label="'Thành tiền ' + (odDetail.voucher ? '(Cả mã giảm giá)' : '')" align="center">
+            <template slot-scope="{row}">
+              {{ formatCurrencyVND(row.totalAmountNet) }} <span v-if="row.totalAmount > row.totalAmountNet" style="text-decoration: line-through;">({{ formatCurrencyVND(row.totalAmount) }})</span>
+            </template>
+          </el-table-column>
+        </el-table>
+
         <div slot="footer" class="dialog-footer">
-          <el-button @click="closeModal()">
+          <el-button v-if="odDetail.order.status === 'WAIT_FOR_CONFIRMATION'" type="danger" @click="changeStatus('CANCELLED')">
             Hủy
           </el-button>
-          <el-button type="primary" @click="edit()">
-            {{ voucher.id ? 'Chỉnh sửa' : 'Thêm mới' }}
+          <el-button v-if="odDetail.order.status === 'WAIT_FOR_CONFIRMATION'" type="primary" @click="changeStatus('PREPARING_GOODS')">
+            Xác nhận
+          </el-button>
+          <el-button v-if="odDetail.order.status === 'PREPARING_GOODS'" type="primary" @click="changeStatus('DELIVERING')">
+            Gửi hàng
+          </el-button>
+          <el-button v-if="odDetail.order.status === 'DELIVERING'" type="primary" @click="changeStatus('DELIVERED')">
+            Đã giao hàng
           </el-button>
         </div>
       </el-dialog>
@@ -173,7 +267,7 @@ import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { parseTime } from '@/utils'
 import { formatCurrencyVND } from '@/utils/format'
 import moment from 'moment'
-import { orderGetAllPageOnline } from '@/api/order'
+import { orderGetAllPageOnline, orderGetDetailById, orderChangeStatus } from '@/api/order'
 
 export default {
   name: 'ProductManagementVoucherListPage',
@@ -250,7 +344,8 @@ export default {
         max: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }
         ]
-      }
+      },
+      odDetail: null
     }
   },
   watch: {
@@ -296,23 +391,7 @@ export default {
     },
     closeModal() {
       this.dialogFormVisible = false
-      this.$refs['dataForm'].clearValidate()
-      this.voucher = {
-        id: null,
-        code: null,
-        type: VoucherType.MONEY,
-        value: 0,
-        quantity: 0,
-        max: 0,
-        startDate: null,
-        endDate: null,
-        createdAt: null,
-        updatedAt: null,
-        createdBy: null,
-        updatedBy: null,
-        status: Status.ACTIVE
-      }
-      this.voucherDate = []
+      this.odDetail = null
     },
     edit() {
       this.$refs['dataForm'].validate((valid) => {
@@ -411,7 +490,32 @@ export default {
       }))
     },
     showDetail(id) {
-      console.log(id)
+      orderGetDetailById(id).then((res) => {
+        this.dialogFormVisible = true
+        this.odDetail = res.data
+      })
+    },
+    changeStatus(status) {
+      this.$confirm('Bạn xác nhận?', 'Xác nhận.', {
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        type: 'warning'
+      }).then(() => {
+        orderChangeStatus({
+          id: this.odDetail.order.id,
+          status: status
+        }).then((res) => {
+          if (res) {
+            this.$message({
+              showClose: true,
+              message: 'Thành công!',
+              type: 'success'
+            })
+            this.dialogFormVisible = false
+            this.getList()
+          }
+        })
+      })
     }
   }
 }

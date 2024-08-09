@@ -28,3 +28,15 @@ export const orderGetAllPageOnline = (params) =>
     params
   })
 
+export const orderGetDetailById = (id) =>
+  request({
+    url: '/order/get-detail-by-id/' + id,
+    method: 'get'
+  })
+
+export const orderChangeStatus = (data) =>
+  request({
+    url: '/order/change-status',
+    method: 'post',
+    data
+  })

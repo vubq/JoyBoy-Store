@@ -11,4 +11,6 @@ public interface OrderDetailService {
     List<OrderDetail> getListOfOrderDetailsByOrderId(String orderId);
 
     Integer getQuantitySold(String productId);
+
+    List<OrderDetail> findAllByOrderId(String orderId);
 }

@@ -1,19 +1,16 @@
 package com.vubq.joyboystore.controllers;
 
+import com.vubq.joyboystore.dtos.ChangeStatusDto;
+import com.vubq.joyboystore.dtos.OrderDTDto;
 import com.vubq.joyboystore.dtos.OrderSATCDto;
-import com.vubq.joyboystore.entities.Order;
-import com.vubq.joyboystore.entities.OrderDetail;
-import com.vubq.joyboystore.entities.ProductDetail;
-import com.vubq.joyboystore.entities.Voucher;
+import com.vubq.joyboystore.entities.*;
 import com.vubq.joyboystore.enums.*;
-import com.vubq.joyboystore.services.OrderDetailService;
-import com.vubq.joyboystore.services.OrderService;
-import com.vubq.joyboystore.services.ProductDetailService;
-import com.vubq.joyboystore.services.VoucherService;
+import com.vubq.joyboystore.services.*;
 import com.vubq.joyboystore.utils.DataTableRequest;
 import com.vubq.joyboystore.utils.DataTableResponse;
 import com.vubq.joyboystore.utils.Response;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,6 +36,9 @@ public class OrderController extends BaseController {
 
     @Autowired
     private OrderDetailService orderDetailService;
+
+    @Autowired
+    private HistoryOrderService historyOrderService;
 
     @PostMapping("pay-sales-at-the-counter")
     @Transactional
@@ -76,9 +77,9 @@ public class OrderController extends BaseController {
 
         List<OrderDetail> listOrderDetail = new ArrayList<>();
         List<ProductDetail> listProductDetail = new ArrayList<>();
-        for(int i = 0; i < dto.getListOrderDetail().size(); i++) {
+        for (int i = 0; i < dto.getListOrderDetail().size(); i++) {
             ProductDetail productDetail = this.productDetailService.getById(dto.getListOrderDetail().get(i).getProductDetailId());
-            if(dto.getListOrderDetail().get(i).getQuantity() > productDetail.getQuantity()) {
+            if (dto.getListOrderDetail().get(i).getQuantity() > productDetail.getQuantity()) {
                 return Response.build()
                         .code(Response.CODE_INTERNAL_ERROR)
                         .data("Số lượng sản phẩm [ " + productDetail.getProduct().getName() + " - " + productDetail.getSize().getName() + " - " + productDetail.getColor().getName() + " - " + productDetail.getMaterial().getName() + " ] không đủ.");
@@ -101,7 +102,7 @@ public class OrderController extends BaseController {
         }
 
         Order order = this.orderService.save(orderNew);
-        if(voucher != null) {
+        if (voucher != null) {
             this.voucherService.save(voucher);
         }
         listOrderDetail.forEach(od -> od.setOrder(order));
@@ -147,7 +148,7 @@ public class OrderController extends BaseController {
         }
 
         List<OrderDetail> listOrderDetail = new ArrayList<>();
-        for(int i = 0; i < dto.getListOrderDetail().size(); i++) {
+        for (int i = 0; i < dto.getListOrderDetail().size(); i++) {
             ProductDetail productDetail = this.productDetailService.getById(dto.getListOrderDetail().get(i).getProductDetailId());
             OrderDetail orderDetail = OrderDetail.builder()
                     .productDetail(productDetail)
@@ -164,7 +165,12 @@ public class OrderController extends BaseController {
         }
 
         Order order = this.orderService.save(orderNew);
-        if(voucher != null) {
+        this.historyOrderService.save(HistoryOder.builder()
+                .orderId(order.getId())
+                .createdAt(new Date())
+                .status(EOrderStatus.WAIT_FOR_CONFIRMATION)
+                .build());
+        if (voucher != null) {
             this.voucherService.save(voucher);
         }
         listOrderDetail.forEach(od -> od.setOrder(order));
@@ -185,5 +191,39 @@ public class OrderController extends BaseController {
                 .ok()
                 .totalRows(result.getTotalElements())
                 .items(result.get().toList());
+    }
+
+    @GetMapping("get-detail-by-id/{id}")
+    public Response getDetailById(@PathVariable String id) {
+        Order order = this.orderService.findById(id).orElse(null);
+        List<OrderDetail> orderDetails = this.orderDetailService.findAllByOrderId(order.getId());
+        List<HistoryOder> historyOders = this.historyOrderService.findAllByOrderId(order.getId());
+        Voucher voucher = null;
+        if(!StringUtils.isEmpty(order.getVoucherId())) {
+            voucher = this.voucherService.getById(order.getVoucherId());
+        }
+
+        OrderDTDto orderDTDto = new OrderDTDto();
+        orderDTDto.setOrder(order);
+        orderDTDto.setListOrderDetail(orderDetails);
+        orderDTDto.setListHistoryOrder(historyOders);
+        orderDTDto.setVoucher(voucher);
+
+        return Response.build().ok().data(orderDTDto);
+    }
+
+    @PostMapping("change-status")
+    public Response changeStatus(@RequestBody ChangeStatusDto changeStatusDto) {
+        Order order = this.orderService.findById(changeStatusDto.getId()).orElse(null);
+        order.setStatus(changeStatusDto.getStatus());
+
+        this.orderService.save(order);
+
+        this.historyOrderService.save(HistoryOder.builder()
+                .orderId(order.getId())
+                .createdAt(new Date())
+                .status(changeStatusDto.getStatus())
+                .build());
+        return Response.build().ok();
     }
 }

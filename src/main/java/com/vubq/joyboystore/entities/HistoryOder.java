@@ -2,11 +2,9 @@ package com.vubq.joyboystore.entities;
 
 import com.vubq.joyboystore.enums.EOrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -17,6 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @FieldNameConstants
 @Entity
+@Builder
 @Table(name = "history_oders")
 public class HistoryOder {
 
@@ -25,9 +24,8 @@ public class HistoryOder {
     @Column(name = "id")
     private String id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column(name = "order_id")
+    private String orderId;
 
     @Column(name = "created_at")
     private Date createdAt;
