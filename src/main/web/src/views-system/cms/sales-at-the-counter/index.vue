@@ -388,7 +388,7 @@ export default {
           updatedBy: '',
           completedAt: '',
           type: '',
-          paymentType: '',
+          paymentType: 'PAYMENT_IN_SHOP',
           status: '',
           listOrderDetail: [],
           isVoucher: false,

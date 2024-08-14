@@ -152,6 +152,20 @@ export const constantRoutes = [
         name: 'Pay',
         meta: { title: 'Pay', icon: 'user', noCache: true },
         hidden: true
+      },
+      {
+        path: 'user/info',
+        component: () => import('@/views-system/web-view/user/info'),
+        name: 'user-info',
+        meta: { icon: 'user', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'user/order',
+        component: () => import('@/views-system/web-view/user/order'),
+        name: 'user-order',
+        meta: { icon: 'user', noCache: true },
+        hidden: true
       }
     ]
   }
