@@ -40,3 +40,9 @@ export const orderChangeStatus = (data) =>
     method: 'post',
     data
   })
+
+export const orderGetAllByUser = () =>
+  request({
+    url: '/order/get-list-order-by-user',
+    method: 'get'
+  })

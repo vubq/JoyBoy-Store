@@ -23,9 +23,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query(value = "SELECT o FROM Order o WHERE o.createdBy = :userId AND o.status = com.vubq.joyboystore.enums.EOrderStatus.CANCELLED")
     List<Order> getAllOrderCancelledByUserId(String userId);
 
-    @Query(value = "SELECT o FROM Order o WHERE o.createdBy = :userId")
+    @Query(value = "SELECT o FROM Order o WHERE o.createdBy = :userId ORDER BY o.createdAt DESC")
     List<Order> getAllOrderByUserId(String userId);
 
     @Query(value = "SELECT DISTINCT new com.vubq.joyboystore.dtos.HistoryCustomerDto(o.fullName, o.phoneNumber, o.address) FROM Order o WHERE o.fullName like %:fullNameCustomer%")
     List<HistoryCustomerDto> getHistoryCustomer(String fullNameCustomer);
+
+    List<Order> findAllByCreatedBy(String createdBy);
 }

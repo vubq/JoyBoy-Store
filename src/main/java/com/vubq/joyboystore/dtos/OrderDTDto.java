@@ -21,4 +21,5 @@ public class OrderDTDto {
     private List<OrderDetail> listOrderDetail;
     private List<HistoryOder> listHistoryOrder;
     private Voucher voucher;
+    private List<ListImageDto> listImage;
 }

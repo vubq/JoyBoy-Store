@@ -20,7 +20,7 @@
                 </router-link>
               </div>
               <div style="margin: 20px 0; cursor: pointer;">
-                <router-link to="/shop/user/info">
+                <router-link to="/shop/user/order">
                   <i class="el-icon-document" />
                   Đơn hàng
                 </router-link>

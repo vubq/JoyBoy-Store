@@ -175,4 +175,9 @@ public class OrderServiceImpl implements OrderService {
                         .and(status.equals("ALL") ? null : specStatus)
                 , pageable);
     }
+
+    @Override
+    public List<Order> getAllByCreatedBy(String createdBy) {
+        return this.orderRepository.findAllByCreatedBy(createdBy);
+    }
 }

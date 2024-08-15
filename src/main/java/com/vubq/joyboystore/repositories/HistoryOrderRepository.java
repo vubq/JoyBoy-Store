@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface HistoryOrderRepository extends JpaRepository<HistoryOder, String> {
 
-    List<HistoryOder> findAllByOrderId(String orderId);
+    List<HistoryOder> findAllByOrderIdOrderByCreatedAtDesc(String orderId);
 }

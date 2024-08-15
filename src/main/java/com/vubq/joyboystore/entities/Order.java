@@ -83,6 +83,12 @@ public class Order {
     @Column(name = "completed_at")
     private Date completedAt;
 
+    @Column(name = "cancel_by")
+    private String cancelBy;
+
+    @Column(name = "cancel_by_id")
+    private String cancelById;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private EOrderType type;

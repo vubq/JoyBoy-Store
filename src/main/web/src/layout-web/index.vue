@@ -8,8 +8,10 @@
         </div>
 
         <div class="menu">
-          <i class="el-icon-user-solid" @click="login" />
-          {{ isCustomer ? name : 'Đăng nhập' }}
+          <router-link to="/shop/user/info">
+            <i class="el-icon-user-solid" @click="login" />
+            {{ isCustomer ? name : 'Đăng nhập' }}
+          </router-link>
         </div>
 
         <div v-if="isCustomer" class="menu" style="border-right: 0;" @click="logout">

@@ -21,6 +21,6 @@ public class HistoryOrderServiceImpl implements HistoryOrderService {
 
     @Override
     public List<HistoryOder> findAllByOrderId(String orderId) {
-        return this.historyOrderRepository.findAllByOrderId(orderId);
+        return this.historyOrderRepository.findAllByOrderIdOrderByCreatedAtDesc(orderId);
     }
 }

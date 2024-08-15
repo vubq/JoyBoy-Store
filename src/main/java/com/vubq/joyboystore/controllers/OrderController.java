@@ -1,6 +1,7 @@
 package com.vubq.joyboystore.controllers;
 
 import com.vubq.joyboystore.dtos.ChangeStatusDto;
+import com.vubq.joyboystore.dtos.ListImageDto;
 import com.vubq.joyboystore.dtos.OrderDTDto;
 import com.vubq.joyboystore.dtos.OrderSATCDto;
 import com.vubq.joyboystore.entities.*;
@@ -39,6 +40,12 @@ public class OrderController extends BaseController {
 
     @Autowired
     private HistoryOrderService historyOrderService;
+
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("pay-sales-at-the-counter")
     @Transactional
@@ -193,6 +200,37 @@ public class OrderController extends BaseController {
                 .items(result.get().toList());
     }
 
+    @GetMapping("get-list-order-by-user")
+    public Response getListOrderByUser() {
+        List<Order> orderList = this.orderService.getAllOrderByUserId(this.getTheCurrentlyLoggedInUserId());
+        List<OrderDTDto> orderDTDtos = new ArrayList<>();
+        for (Order order : orderList) {
+            List<OrderDetail> orderDetails = this.orderDetailService.findAllByOrderId(order.getId());
+            List<HistoryOder> historyOders = this.historyOrderService.findAllByOrderId(order.getId());
+            Voucher voucher = null;
+            if(!StringUtils.isEmpty(order.getVoucherId())) {
+                voucher = this.voucherService.getById(order.getVoucherId());
+            }
+            OrderDTDto orderDTDto = new OrderDTDto();
+            orderDTDto.setOrder(order);
+            orderDTDto.setListOrderDetail(orderDetails);
+            orderDTDto.setListHistoryOrder(historyOders);
+            orderDTDto.setVoucher(voucher);
+            orderDTDtos.add(orderDTDto);
+            List<ListImageDto> listImageDtos = new ArrayList<>();
+            for (OrderDetail od: orderDetails) {
+                listImageDtos.add(
+                        ListImageDto.builder()
+                                .id(od.getId())
+                                .listImage(this.imageService.getAllUrlBySecondaryId(od.getProductDetail().getProduct().getId()))
+                                .build()
+                );
+            }
+            orderDTDto.setListImage(listImageDtos);
+        }
+        return Response.build().ok().data(orderDTDtos);
+    }
+
     @GetMapping("get-detail-by-id/{id}")
     public Response getDetailById(@PathVariable String id) {
         Order order = this.orderService.findById(id).orElse(null);
@@ -216,6 +254,16 @@ public class OrderController extends BaseController {
     public Response changeStatus(@RequestBody ChangeStatusDto changeStatusDto) {
         Order order = this.orderService.findById(changeStatusDto.getId()).orElse(null);
         order.setStatus(changeStatusDto.getStatus());
+        if(changeStatusDto.getStatus() == EOrderStatus.CANCELLED) {
+            User user = this.userService.getById(this.getTheCurrentlyLoggedInUserId());
+            List<Role> roleList = user.getRoles().stream().toList();
+            if (roleList.get(0).getName() == ERole.ROLE_CUSTOMER) {
+                order.setCancelBy("CUSTOMER");
+            } else {
+                order.setCancelBy("ADMIN");
+            }
+            order.setCancelById(this.getTheCurrentlyLoggedInUserId());
+        }
 
         this.orderService.save(order);
 

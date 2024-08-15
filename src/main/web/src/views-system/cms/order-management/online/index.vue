@@ -179,22 +179,24 @@
                   :timestamp="moment(h.createdAt).format('HH:mm:ss DD-MM-YYYY')"
                 >
                   <span v-if="h.status === 'WAIT_FOR_CONFIRMATION'">
-                    <el-tag type="warning" size="small">Chờ xác nhận</el-tag>
+                    <el-tag :type="odDetail.listHistoryOrder.length === 1 ? 'warning' : 'success'" size="small">Chờ xác nhận</el-tag>
                   </span>
                   <span v-if="h.status === 'PREPARING_GOODS'">
-                    <el-tag type="warning" size="small">Chuẩn bị hàng</el-tag>
+                    <el-tag :type="odDetail.listHistoryOrder.length === 2 ? 'warning' : 'success'" size="small">Chuẩn bị hàng</el-tag>
                   </span>
                   <span v-if="h.status === 'DELIVERING'">
-                    <el-tag type="warning" size="small">Đang giao hàng</el-tag>
+                    <el-tag :type="odDetail.listHistoryOrder.length === 3 ? 'warning' : 'success'" size="small">Đang giao hàng</el-tag>
                   </span>
                   <span v-if="h.status === 'DELIVERED'">
-                    <el-tag type="warning" size="small">Đã giao hàng</el-tag>
+                    <el-tag :type="odDetail.listHistoryOrder.length === 4 ? 'warning' : 'success'" size="small">Đã giao hàng</el-tag>
                   </span>
                   <span v-if="h.status === 'SUCCESS'">
                     <el-tag type="success" size="small">Thành công</el-tag>
                   </span>
                   <span v-if="h.status === 'CANCELLED'">
                     <el-tag type="danger" size="small">Đã hủy</el-tag>
+                    <div v-if="odDetail.order.cancelBy === 'ADMIN'" style="margin-top: 5px;">Người bán hủy</div>
+                    <div v-if="odDetail.order.cancelBy === 'CUSTOMER'" style="margin-top: 5px;">Người mua hủy</div>
                   </span>
                 </el-timeline-item>
               </el-timeline>
