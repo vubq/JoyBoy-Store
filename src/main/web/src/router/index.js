@@ -296,9 +296,27 @@ export const asyncRoutes = [
       },
       {
         path: 'list-at-the-shop',
-        component: () => import('@/views-system/cms/order-management/online/index.vue'),
+        component: () => import('@/views-system/cms/order-management/at-the-shop/index.vue'),
         name: 'order-at-the-shop-management-list-page',
         meta: { title: 'Tại cửa hàng', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
+      }
+    ]
+  },
+  {
+    path: '/admin/user-management',
+    component: Layout,
+    redirect: '/admin/user-management/list',
+    name: 'user-management',
+    meta: {
+      title: 'Quản lý Người dùng',
+      icon: 'component'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views-system/cms/user-management/customer-at-the-shop.vue'),
+        name: 'user-management-list-page',
+        meta: { title: 'Quản lý Người dùng', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       }
     ]
   },

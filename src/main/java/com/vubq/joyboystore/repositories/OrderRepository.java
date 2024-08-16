@@ -26,8 +26,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query(value = "SELECT o FROM Order o WHERE o.createdBy = :userId ORDER BY o.createdAt DESC")
     List<Order> getAllOrderByUserId(String userId);
 
-    @Query(value = "SELECT DISTINCT new com.vubq.joyboystore.dtos.HistoryCustomerDto(o.fullName, o.phoneNumber, o.address) FROM Order o WHERE o.fullName like %:fullNameCustomer%")
+    @Query(value = "SELECT DISTINCT new com.vubq.joyboystore.dtos.HistoryCustomerDto(o.fullName, o.phoneNumber, o.address) FROM Order o WHERE o.fullName like %:fullNameCustomer% AND o.type = 'AT_THE_SHOP'")
     List<HistoryCustomerDto> getHistoryCustomer(String fullNameCustomer);
+
+    @Query(value = "SELECT DISTINCT new com.vubq.joyboystore.dtos.HistoryCustomerDto(o.fullName, o.phoneNumber, o.address) FROM Order o WHERE o.phoneNumber like %:phone% AND o.type = 'AT_THE_SHOP'")
+    List<HistoryCustomerDto> getHistoryCustomerPN(String phone);
 
     List<Order> findAllByCreatedBy(String createdBy);
 }

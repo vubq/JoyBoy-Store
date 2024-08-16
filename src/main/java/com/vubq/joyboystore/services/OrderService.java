@@ -31,6 +31,8 @@ public interface OrderService {
 
     List<HistoryCustomerDto> getHistoryCustomer(String fullNameCustomer);
 
+    List<HistoryCustomerDto> getHistoryCustomerPN(String fullNameCustomer);
+
     Page<Order> getAllPage(DataTableRequest request, String status, String dateFrom, String dateTo, EOrderType type);
 
     List<Order> getAllByCreatedBy(String createdBy);

@@ -28,6 +28,13 @@ export const orderGetAllPageOnline = (params) =>
     params
   })
 
+export const orderGetAllPageAtTheCounter = (params) =>
+  request({
+    url: '/order/get-all-page-at-the-counter',
+    method: 'get',
+    params
+  })
+
 export const orderGetDetailById = (id) =>
   request({
     url: '/order/get-detail-by-id/' + id,
@@ -45,4 +52,18 @@ export const orderGetAllByUser = () =>
   request({
     url: '/order/get-list-order-by-user',
     method: 'get'
+  })
+
+export const getHistoryCustomer = (data) =>
+  request({
+    url: '/order/get-history-customer',
+    method: 'post',
+    data
+  })
+
+export const getHistoryCustomerPN = (data) =>
+  request({
+    url: '/order/get-history-customer-phone',
+    method: 'post',
+    data
   })

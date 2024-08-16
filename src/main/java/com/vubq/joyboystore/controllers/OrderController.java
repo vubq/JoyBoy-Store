@@ -1,9 +1,6 @@
 package com.vubq.joyboystore.controllers;
 
-import com.vubq.joyboystore.dtos.ChangeStatusDto;
-import com.vubq.joyboystore.dtos.ListImageDto;
-import com.vubq.joyboystore.dtos.OrderDTDto;
-import com.vubq.joyboystore.dtos.OrderSATCDto;
+import com.vubq.joyboystore.dtos.*;
 import com.vubq.joyboystore.entities.*;
 import com.vubq.joyboystore.enums.*;
 import com.vubq.joyboystore.services.*;
@@ -200,6 +197,21 @@ public class OrderController extends BaseController {
                 .items(result.get().toList());
     }
 
+    @GetMapping("get-all-page-at-the-counter")
+    public DataTableResponse getAllPageAtTheCounter(
+            DataTableRequest request,
+            @RequestParam String status,
+            @RequestParam String dateFrom,
+            @RequestParam String dateTo
+    ) {
+        Page<Order> result = this.orderService.getAllPage(request, status, dateFrom, dateTo, EOrderType.AT_THE_SHOP);
+
+        return DataTableResponse.build()
+                .ok()
+                .totalRows(result.getTotalElements())
+                .items(result.get().toList());
+    }
+
     @GetMapping("get-list-order-by-user")
     public Response getListOrderByUser() {
         List<Order> orderList = this.orderService.getAllOrderByUserId(this.getTheCurrentlyLoggedInUserId());
@@ -273,5 +285,15 @@ public class OrderController extends BaseController {
                 .status(changeStatusDto.getStatus())
                 .build());
         return Response.build().ok();
+    }
+
+    @PostMapping("get-history-customer")
+    public Response getHistoryCustomer(@RequestBody HistoryCustomerDto historyCustomerDto) {
+        return Response.build().ok().data(this.orderService.getHistoryCustomer(historyCustomerDto.getFullName()));
+    }
+
+    @PostMapping("get-history-customer-phone")
+    public Response getHistoryCustomerPhone(@RequestBody HistoryCustomerDto historyCustomerDto) {
+        return Response.build().ok().data(this.orderService.getHistoryCustomerPN(historyCustomerDto.getPhoneNumber()));
     }
 }

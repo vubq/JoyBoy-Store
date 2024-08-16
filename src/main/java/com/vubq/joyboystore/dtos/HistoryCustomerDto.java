@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class HistoryCustomerDto {
 
-    private String fullNameCustomer;
+    private String fullName;
     private String phoneNumber;
     private String address;
 }

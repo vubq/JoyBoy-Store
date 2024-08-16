@@ -168,25 +168,45 @@
               style="margin-top: 10px;"
             >
               <el-form-item prop="fullName">
-                <el-input
+                <el-autocomplete
+                  v-model="listOrder[indexOrder()].fullName"
+                  class="inline-input input-border-bottom"
+                  placeholder="Tên Khách hàng"
+                  :fetch-suggestions="querySearch"
+                  :trigger-on-focus="false"
+                  style="width: 100%;"
+                  @select="handleSelect"
+                >
+                  <template slot-scope="{ item }">
+                    <span>{{ item.fullName + ' - ' + item.phoneNumber + (item.address ? ' - ' + item.address : '') }}</span>
+                  </template>
+                  <i slot="suffix" class="el-icon-user" />
+                </el-autocomplete>
+                <!-- <el-input
                   v-model="listOrder[indexOrder()].fullName"
                   placeholder="Tên Khách hàng"
                   class="input-border-bottom"
                   style="width: 100%"
                 >
                   <i slot="suffix" class="el-icon-user" />
-                </el-input>
+                </el-input> -->
               </el-form-item>
 
               <el-form-item prop="phoneNumber">
-                <el-input
+                <el-autocomplete
                   v-model="listOrder[indexOrder()].phoneNumber"
+                  class="inline-input input-border-bottom"
                   placeholder="SĐT Khách hàng"
-                  class="input-border-bottom"
-                  style="width: 100%"
+                  :fetch-suggestions="querySearch2"
+                  :trigger-on-focus="false"
+                  style="width: 100%;"
+                  @select="handleSelect"
                 >
+                  <template slot-scope="{ item }">
+                    <span>{{ item.fullName + ' - ' + item.phoneNumber + (item.address ? ' - ' + item.address : '') }}</span>
+                  </template>
                   <i slot="suffix" class="el-icon-phone-outline" />
-                </el-input>
+                </el-autocomplete>
               </el-form-item>
 
               <el-form-item prop="address">
@@ -344,7 +364,7 @@ import { ResponseCode, Status, VoucherType } from '@/enums/enums'
 import { voucherGetAllLikeCodeAndStillActive, voucherGetByCode } from '@/api/voucher'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { orderPaySalesAtTheCounter } from '@/api/order'
+import { orderPaySalesAtTheCounter, getHistoryCustomer, getHistoryCustomerPN } from '@/api/order'
 
 export default {
   name: 'ProductManagementBrandListPage',
@@ -484,7 +504,7 @@ export default {
         updatedBy: '',
         completedAt: '',
         type: '',
-        paymentType: '',
+        paymentType: 'PAYMENT_IN_SHOP',
         status: '',
         listOrderDetail: [],
         isVoucher: false,
@@ -496,6 +516,7 @@ export default {
       this.orderId = newOrderId
     },
     deleteOrder(o) {
+      console.log(o)
       // eslint-disable-next-line prefer-const
       let os = this.listOrder
       let orderIdActive = this.orderId
@@ -677,6 +698,41 @@ export default {
     calculatedMoneyRefunds(i) {
       this.listOrder[i].moneyRefunds = this.listOrder[i].moneyPaid >= this.listOrder[i].totalAmountNet ? this.listOrder[i].moneyPaid - this.listOrder[i].totalAmountNet : 0
     },
+    querySearch(queryString, cb) {
+      const data = []
+      getHistoryCustomer({
+        fullName: queryString
+      }).then((res) => {
+        res.data.forEach(e => {
+          data.push({
+            fullName: e.fullName,
+            phoneNumber: e.phoneNumber,
+            address: e.address
+          })
+        })
+      })
+      cb(data)
+    },
+    querySearch2(queryString, cb) {
+      const data = []
+      getHistoryCustomerPN({
+        phoneNumber: queryString
+      }).then((res) => {
+        res.data.forEach(e => {
+          data.push({
+            fullName: e.fullName,
+            phoneNumber: e.phoneNumber,
+            address: e.address
+          })
+        })
+      })
+      cb(data)
+    },
+    handleSelect(item) {
+      this.listOrder[this.indexOrder()].fullName = item.fullName
+      this.listOrder[this.indexOrder()].phoneNumber = item.phoneNumber
+      this.listOrder[this.indexOrder()].address = item.address
+    },
     pay(i) {
       // eslint-disable-next-line no-unused-vars
       let isValidate = true
@@ -738,7 +794,8 @@ export default {
       }).then(async() => {
         orderPaySalesAtTheCounter(this.listOrder[i]).then(res => {
           if (res && res.code === ResponseCode.CODE_SUCCESS) {
-            this.listOrder[i].listOrderDetail.splice(i, 1)
+            // this.listOrder[i].listOrderDetail.splice(i, 1)
+            this.deleteOrder(this.listOrder[i].id)
             this.$message({
               showClose: true,
               message: 'Thanh toán thành công.',

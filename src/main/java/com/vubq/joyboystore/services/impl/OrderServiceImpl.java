@@ -127,6 +127,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<HistoryCustomerDto> getHistoryCustomerPN(String phone) {
+        return this.orderRepository.getHistoryCustomerPN(phone);
+    }
+
+    @Override
     public Page<Order> getAllPage(DataTableRequest request, String status, String dateFrom, String dateTo, EOrderType type) {
         PageRequest pageable = request.toPageable();
         BaseSpecification<Order> specFullNameCustomerContains = new BaseSpecification<>(
