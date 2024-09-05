@@ -52,7 +52,7 @@
             </el-form-item>
 
             <el-form-item>
-              <div style="font-size: 15px; color: rgba(0,0,0,.26); text-align: center;">Bạn chưa có tài khoản? <span style="color: #11A983; font-weight: bold;">Đăng ký</span></div>
+              <div style="font-size: 15px; color: rgba(0,0,0,.26); text-align: center;">Bạn chưa có tài khoản? <span style="color: #11A983; font-weight: bold;" @click="toPageRegister">Đăng ký</span></div>
             </el-form-item>
           </el-form>
         </div>
@@ -146,6 +146,11 @@ export default {
         }
         return acc
       }, {})
+    },
+    toPageRegister() {
+      this.$router.push({
+        path: '/shop/register'
+      })
     }
   }
 }

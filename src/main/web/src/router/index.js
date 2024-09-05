@@ -68,11 +68,10 @@ export const constantRoutes = [
     path: '/',
     component: Layout,
     redirect: '/admin/dashboard',
-    hidden: true,
     children: [
       {
         path: '/admin/dashboard',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views-system/cms/statistical/index'),
         name: 'Dashboard',
         meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
       }
@@ -137,6 +136,13 @@ export const constantRoutes = [
         component: () => import('@/views-system/web-view/login'),
         name: 'Login',
         meta: { title: 'Login', icon: 'user', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'register',
+        component: () => import('@/views-system/web-view/register'),
+        name: 'Register',
+        meta: { title: 'Register', icon: 'user', noCache: true },
         hidden: true
       },
       {

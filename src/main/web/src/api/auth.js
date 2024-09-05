@@ -54,3 +54,11 @@ export const userGetById = (id) =>
     url: '/user/get-by-id/' + id,
     method: 'get'
   })
+
+export const registerUser = (data) =>
+  request({
+    url: '/user/register',
+    method: 'post',
+    data
+  })
+

@@ -2,8 +2,10 @@ package com.vubq.joyboystore.controllers;
 
 import com.vubq.joyboystore.dtos.UserInfoDto;
 import com.vubq.joyboystore.entities.Order;
+import com.vubq.joyboystore.entities.Role;
 import com.vubq.joyboystore.entities.User;
 import com.vubq.joyboystore.enums.EOrderType;
+import com.vubq.joyboystore.enums.ERole;
 import com.vubq.joyboystore.services.RoleService;
 import com.vubq.joyboystore.services.UserService;
 import com.vubq.joyboystore.utils.DataTableRequest;
@@ -17,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -98,5 +102,15 @@ public class UserController {
     @GetMapping("get-by-id/{id}")
     private Response getById(@PathVariable String id) {
         return Response.build().ok().data(this.userService.findById(id));
+    }
+
+    @PostMapping("register")
+    private Response register(@RequestBody User user) {
+        Set<Role> roles = new HashSet<>();
+        roles.add(this.roleService.findByName(ERole.ROLE_CUSTOMER).get());
+        user.setRoles(roles);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        this.userService.save(user);
+        return Response.build().ok();
     }
 }

@@ -82,7 +82,7 @@
                       </div>
                     </div>
                     <div style="position: absolute; top: 0; right: -50px; cursor: pointer;">
-                      <i class="el-icon-close" @click="removeProduct(p.id)" />
+                      <i class="el-icon-delete" @click="removeProduct(p.id)" />
                     </div>
                   </div>
                 </div>
@@ -117,7 +117,7 @@
 
               <!-- Button add to cart -->
               <div slot="reference">
-                <el-badge :value="genTotalSP()" class="item">
+                <el-badge :value="cart.length" class="item">
                   <i class="el-icon-shopping-cart-full" style="cursor: pointer;" />
                 </el-badge>
               </div>

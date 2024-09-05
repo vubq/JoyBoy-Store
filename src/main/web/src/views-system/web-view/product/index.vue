@@ -112,11 +112,19 @@
                 </div>
               </div>
             </div>
-            <div style="margin-top: 20px; padding: 10px 0;">
-              <span style="padding: 10px 25px; background-color: #11A983; color: #fff; border-radius: 4px; font-size: 18px; cursor: pointer;" @click="addToCart()">
-                <i class="el-icon-shopping-cart-full" />
-                Thêm vào giỏ hàng
-              </span>
+            <div style="display: flex;">
+              <div style="margin-top: 20px; padding: 10px 0; margin-right: 10px;">
+                <span style="padding: 10px 25px; background-color: #11A983; color: #fff; border-radius: 4px; font-size: 18px; cursor: pointer;" @click="muaNgay()">
+                  <i class="el-icon-shopping-cart-full" />
+                  Mua ngay
+                </span>
+              </div>
+              <div style="margin-top: 20px; padding: 10px 0;">
+                <span style="padding: 10px 25px; background-color: #11A983; color: #fff; border-radius: 4px; font-size: 18px; cursor: pointer;" @click="addToCart()">
+                  <i class="el-icon-shopping-cart-full" />
+                  Thêm vào giỏ hàng
+                </span>
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -131,7 +139,7 @@ import { getProductDetailByAttributes } from '@/api/product-detail'
 import { ResponseCode } from '@/enums/enums'
 import { formatCurrencyVND } from '@/utils/format'
 import moment from 'moment'
-import { mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'ProductViewPage',
@@ -159,6 +167,9 @@ export default {
       maxPrice: 0,
       minPrice: 0
     }
+  },
+  computed: {
+    ...mapGetters(['userId', 'name', 'isCustomer', 'cart', 'token'])
   },
   watch: {
   },
@@ -200,7 +211,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'addProductToCart'
+      'addProductToCart',
+      'clearCart'
     ]),
     selectVariant(id, variant) {
       // const s = []
@@ -258,6 +270,66 @@ export default {
       // this.listSizeActive = s
       // this.listColorActive = c
       // this.listMaterialActive = m
+    },
+    muaNgay() {
+      if (this.sizeId && this.colorId && this.materialId) {
+        if (this.quantityPurchased <= 0) {
+          this.$notify({
+            title: 'Cảnh báo.',
+            message: 'Chọn số lượng sản phẩm.',
+            type: 'error',
+            offset: 100
+          })
+          return
+        }
+        if (this.quantityPurchased > this.totalQuantity) {
+          this.$notify({
+            title: 'Cảnh báo.',
+            message: 'Số lượng sản phẩm còn lại không đủ.',
+            type: 'error',
+            offset: 100
+          })
+        } else {
+          getProductDetailByAttributes({
+            productId: this.productId,
+            sizeId: this.sizeId,
+            colorId: this.colorId,
+            materialId: this.materialId
+          }).then(res => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.clearCart()
+              this.addProductToCart({
+                productDetailId: res.data.id,
+                quantity: this.quantityPurchased
+              })
+              if (!this.isCustomer) {
+                this.$confirm('Để tiến hành mua hàng, bạn cần đăng nhập?', 'Thông báo.', {
+                  confirmButtonText: 'Đăng nhập',
+                  cancelButtonText: 'Hủy',
+                  type: 'warning'
+                }).then(() => {
+                  this.showCart = false
+                  this.$router.push({
+                    path: '/shop/pay'
+                  })
+                })
+              } else {
+                this.showCart = false
+                this.$router.push({
+                  path: '/shop/pay'
+                })
+              }
+            }
+          })
+        }
+      } else {
+        this.$notify({
+          title: 'Cảnh báo.',
+          message: 'Bạn cần chọn các thuộc tính của sản phẩm.',
+          type: 'error',
+          offset: 100
+        })
+      }
     },
     addToCart() {
       if (this.sizeId && this.colorId && this.materialId) {

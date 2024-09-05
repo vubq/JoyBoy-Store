@@ -39,6 +39,12 @@ export const productGetTop5ProductCreatedAtDESC = (params) =>
     method: 'get'
   })
 
+export const productGetTop5ProductBestSelling = (params) =>
+  request({
+    url: '/product/get-top-5-product-best-selling',
+    method: 'get'
+  })
+
 export const productGetAllProductDetailView = (id) =>
   request({
     url: '/product/get-all-product-detail-view/' + id,

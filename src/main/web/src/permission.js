@@ -9,7 +9,7 @@ import { Role } from './enums/enums'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/admin/login', '/auth-redirect', '/shop/login', '/shop/home', '/shop/product/:id']
+const whiteList = ['/admin/login', '/auth-redirect', '/shop/login', '/shop/register', '/shop/home', '/shop/product/:id']
 
 router.beforeEach(async(to, from, next) => {
   NProgress.start()
