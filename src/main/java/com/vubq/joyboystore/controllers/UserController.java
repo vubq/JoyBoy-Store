@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/webapi/user")
-public class UserController {
+public class UserController extends BaseController {
 
     @Autowired
     UserService userService;
@@ -110,6 +110,23 @@ public class UserController {
         roles.add(this.roleService.findByName(ERole.ROLE_CUSTOMER).get());
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        this.userService.save(user);
+        return Response.build().ok();
+    }
+
+    @PostMapping("update-user")
+    private Response updateUser(@RequestBody User user) {
+        User user1 = this.userService.getById(this.getTheCurrentlyLoggedInUserId());
+        user1.setFullName(user.getFullName());
+        user1.setPhoneNumber(user.getPhoneNumber());
+        user1.setEmail(user.getEmail());
+        user1.setCity(user.getCity());
+        user1.setDistrict(user.getDistrict());
+        user1.setWard(user.getWard());
+        user1.setCityCode(user.getCityCode());
+        user1.setDistrictCode(user.getDistrictCode());
+        user1.setWardCode(user.getWardCode());
+        user1.setAddress(user.getAddress());
         this.userService.save(user);
         return Response.build().ok();
     }

@@ -59,7 +59,11 @@
         style="width: 100%;"
         border
       >
-        <el-table-column label="Sản phẩm" prop="productName" />
+        <el-table-column label="Sản phẩm" prop="productName">
+          <template slot-scope="{row}">
+            <router-link class="link" :to="'/admin/product-management/product/detail?id=' + row.id">{{ row.productName }}</router-link>
+          </template>
+        </el-table-column>
 
         <el-table-column label="Số lượng bán được" prop="quantity" />
 
@@ -166,5 +170,8 @@ export default {
   .el-table--medium th, .el-table--medium td {
     height: 80px;
   }
+}
+.link:hover {
+  text-decoration: underline;
 }
 </style>

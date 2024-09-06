@@ -65,6 +65,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/admin',
+    component: Layout,
+    redirect: '/admin/dashboard'
+  },
+  {
     path: '/',
     component: Layout,
     redirect: '/admin/dashboard',
@@ -174,14 +179,7 @@ export const constantRoutes = [
         hidden: true
       }
     ]
-  }
-]
-
-/**
- * asyncRoutes
- * the routes that need to be dynamically loaded based on user roles
- */
-export const asyncRoutes = [
+  },
   {
     path: '/admin/sales-at-the-counter',
     component: Layout,
@@ -325,7 +323,14 @@ export const asyncRoutes = [
         meta: { title: 'Quản lý Người dùng', noCache: true, roles: ['ROLE_SUPER_ADMIN', 'ROLE_STAFF_WAREHOUSE_MANAGEMENT', 'ROLE_STAFF_SALES'] }
       }
     ]
-  },
+  }
+]
+
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
 
   // {
   //   path: '/admin/user-management',

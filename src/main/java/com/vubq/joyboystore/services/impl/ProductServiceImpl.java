@@ -120,4 +120,9 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getTop5ProductBestSelling() {
         return this.productRepository.getAllByIdIn(this.productRepository.getTop5ProductBestSellingString());
     }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return this.productRepository.getAllProducts();
+    }
 }

@@ -8,7 +8,7 @@
             <div style="display: flex;">
               <el-avatar :size="50" :src="'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
               <div style="display: flex; align-items: center; margin-left: 15px;">
-                {{ user.fullName }}
+                {{ name }}
               </div>
             </div>
 
@@ -34,20 +34,20 @@
             <div style="font-size: 20px;">Thông tin tài khoản</div>
             <el-divider class="custom-divider" />
             <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr;">
-              <el-form ref="form" label-width="120px">
-                <el-form-item label="Họ tên">
+              <el-form ref="dataFormLogin" v-loading="loading" :model="user" :rules="rules" label-width="120px">
+                <el-form-item label="Họ tên" prop="fullName">
                   <el-input v-model="user.fullName" />
                 </el-form-item>
 
-                <el-form-item label="Số điện thoại">
+                <el-form-item label="Số điện thoại" prop="phoneNumber">
                   <el-input v-model="user.phoneNumber" />
                 </el-form-item>
 
-                <el-form-item label="Email">
+                <el-form-item label="Email" prop="email">
                   <el-input v-model="user.email" />
                 </el-form-item>
 
-                <el-form-item label="Tỉnh/Thành phố">
+                <el-form-item label="Tỉnh/Thành phố" prop="cityCode">
                   <el-select v-model="user.cityCode" filterable style="width: 100%;">
                     <el-option
                       v-for="c in listCity"
@@ -58,7 +58,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="Quận/Huyện">
+                <el-form-item label="Quận/Huyện" prop="districtCode">
                   <el-select v-model="user.districtCode" filterable style="width: 100%;">
                     <el-option
                       v-for="d in listDistrict"
@@ -69,7 +69,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="Phường/Xã">
+                <el-form-item label="Phường/Xã" prop="wardCode">
                   <el-select v-model="user.wardCode" filterable style="width: 100%;">
                     <el-option
                       v-for="w in listWard"
@@ -80,7 +80,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="Địa chỉ">
+                <el-form-item label="Địa chỉ" prop="address">
                   <el-input
                     v-model="user.address"
                     type="textarea"
@@ -89,7 +89,7 @@
                 </el-form-item>
 
                 <el-form-item>
-                  <el-button type="primary">Lưu</el-button>
+                  <el-button type="primary" @click="updateUserHH">Lưu</el-button>
                 </el-form-item>
               </el-form>
 
@@ -107,18 +107,52 @@
 <script>
 import { ResponseCode } from '@/enums/enums'
 import axios from 'axios'
-import { getUserInfo } from '@/api/auth'
+import { getUserInfo, updateUser } from '@/api/auth'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'UserInfoPage',
   components: { },
   data() {
     return {
+      rules: {
+        userName: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        passwordConfirm: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        fullName: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        phoneNumber: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        cityCode: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        districtCode: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ],
+        wardCode: [
+          { required: true, message: 'Không được để trống', trigger: 'blur' }
+        ]
+      },
       listCity: [],
       listDistrict: [],
       listWard: [],
-      user: {}
+      user: {},
+      loading: false
     }
+  },
+  computed: {
+    ...mapGetters(['userId', 'name', 'isCustomer', 'cart', 'token'])
   },
   watch: {
     'user.cityCode': function() {
@@ -165,6 +199,24 @@ export default {
   destroyed() {
   },
   methods: {
+    updateUserHH() {
+      this.$refs.dataFormLogin.validate(async valid => {
+        if (valid) {
+          this.isShowSuccess = false
+          this.loading = true
+          updateUser(this.user).then((res) => {
+            if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.isShowSuccess = true
+              this.loading = false
+              console.log('aaaa')
+            }
+          })
+          // .finally(() => this.loading = false)
+        } else {
+          return false
+        }
+      })
+    }
   }
 }
 </script>

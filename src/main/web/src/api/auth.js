@@ -62,3 +62,10 @@ export const registerUser = (data) =>
     data
   })
 
+export const updateUser = (data) =>
+  request({
+    url: '/user/update-user',
+    method: 'post',
+    data
+  })
+

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Top10P {
 
+    private String id;
     private String productName;
     private Long quantity;
     private Double totalMoney;

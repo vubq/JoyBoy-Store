@@ -34,6 +34,9 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     List<Product> getAllByIdIn(List<String> ids);
 
-    @Query(value = "SELECT new com.vubq.joyboystore.dtos.Top10P(p.name, SUM(od.quantity), SUM(od.totalAmountNet)) FROM OrderDetail od JOIN ProductDetail pd ON pd.id = od.productDetail.id JOIN Product p ON p.id = pd.product.id JOIN Order o ON o.id = od.order.id WHERE p.status = com.vubq.joyboystore.enums.EStatus.ACTIVE AND o.status = com.vubq.joyboystore.enums.EOrderStatus.SUCCESS AND od.createdAt BETWEEN :dateFrom AND :dateTo GROUP BY p.id ORDER BY SUM(od.quantity) DESC LIMIT 5")
+    @Query(value = "SELECT new com.vubq.joyboystore.dtos.Top10P(p.id, p.name, SUM(od.quantity), SUM(od.totalAmountNet)) FROM OrderDetail od JOIN ProductDetail pd ON pd.id = od.productDetail.id JOIN Product p ON p.id = pd.product.id JOIN Order o ON o.id = od.order.id WHERE p.status = com.vubq.joyboystore.enums.EStatus.ACTIVE AND o.status = com.vubq.joyboystore.enums.EOrderStatus.SUCCESS AND od.createdAt BETWEEN :dateFrom AND :dateTo GROUP BY p.id ORDER BY SUM(od.quantity) DESC LIMIT 5")
     List<Top10P> getTop10ProductBestSelling(Date dateFrom, Date dateTo);
+
+    @Query(value = "SELECT p FROM Product p WHERE p.status = com.vubq.joyboystore.enums.EStatus.ACTIVE")
+    List<Product> getAllProducts();
 }

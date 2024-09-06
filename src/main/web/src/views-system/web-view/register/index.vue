@@ -12,10 +12,10 @@
           <h3>Đăng ký</h3>
 
           <el-form ref="dataFormLogin" v-loading="loading" :model="user" :rules="rules">
-            <el-form-item v-if="isShowError">
+            <el-form-item v-if="isShowSuccess">
               <el-alert
-                title="Tài khoản hoặc mật khẩu không đúng."
-                type="error"
+                title="Đăng ký thành công!"
+                type="success"
                 show-icon
                 :closable="false"
               />
@@ -147,6 +147,7 @@ export default {
         ]
       },
       isShowError: false,
+      isShowSuccess: false,
       otherQuery: {},
       redirect: undefined,
       loading: false,
@@ -209,11 +210,16 @@ export default {
     async register() {
       this.$refs.dataFormLogin.validate(async valid => {
         if (valid) {
+          this.isShowSuccess = false
+          this.loading = true
           registerUser(this.user).then((res) => {
             if (res && res.code === ResponseCode.CODE_SUCCESS) {
+              this.isShowSuccess = true
+              this.loading = false
               console.log('aaaa')
             }
           })
+          // .finally(() => this.loading = false)
         } else {
           return false
         }

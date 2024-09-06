@@ -17,20 +17,27 @@ router.beforeEach(async(to, from, next) => {
   const hasToken = getToken()
 
   if (hasToken) {
+    console.log(store.getters.roles)
     if (to.path === '/admin/login' && !store.getters.roles.includes(Role.ROLE_CUSTOMER)) {
       next({ path: '/' })
       NProgress.done()
     } else if (to.path === '/shop/login' && store.getters.roles.includes(Role.ROLE_CUSTOMER)) {
       next({ path: '/shop' })
       NProgress.done()
+    } else if (to.path.includes('/shop') && !store.getters.roles.includes(Role.ROLE_CUSTOMER)) {
+      await store.dispatch('user/resetToken')
+      next({ path: to.path })
+    } else if (to.path.includes('/admin') && store.getters.roles.includes(Role.ROLE_CUSTOMER)) {
+      await store.dispatch('user/resetToken')
+      next({ path: to.path })
     } else {
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
+      const { roles } = await store.dispatch('user/getInfo')
+      const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
       if (hasRoles) {
         next()
       } else {
         try {
-          const { roles } = await store.dispatch('user/getInfo')
-          const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
           router.addRoutes(accessRoutes)
           next({ ...to, replace: true })
         } catch (error) {

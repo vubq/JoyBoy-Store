@@ -506,6 +506,68 @@ public class ProductController extends BaseController {
         return Response.build().ok().data(listProductWebViewDto);
     }
 
+    @GetMapping("get-all-products")
+    public Response getAllProducts() {
+        List<Product> listProduct = this.productService.getAllProducts();
+        List<ProductWebViewDto> listProductWebViewDto = new ArrayList<>();
+        listProduct.forEach(p -> {
+            ProductWebViewDto productWebViewDto = ProductWebViewDto.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .description(p.getDescription())
+                    .price(p.getPrice())
+                    .priceNet(p.getPriceNet())
+                    .category(
+                            CategoryDto.builder()
+                                    .id(p.getCategory().getId())
+                                    .name(p.getCategory().getName())
+                                    .build()
+                    )
+                    .brand(
+                            BrandDto.builder()
+                                    .id(p.getBrand().getId())
+                                    .name(p.getBrand().getName())
+                                    .build()
+                    )
+                    .rate(this.feedbackService.getRateProduct(p.getId()))
+                    .listImage(this.imageService.getAllUrlBySecondaryId(p.getId()))
+                    .build();
+            List<ProductDetail> listProductDetail = this.productDetailService.getAllByProductId(p.getId());
+            List<ProductDetailWebViewDto> listProductDetailWebViewDto = new ArrayList<>();
+            listProductDetail.forEach(pd -> {
+                ProductDetailWebViewDto productDetailWebViewDto = ProductDetailWebViewDto.builder()
+                        .id(pd.getId())
+                        .price(pd.getPrice())
+                        .priceNet(pd.getPriceNet())
+                        .quantity(pd.getQuantity())
+                        .size(
+                                SizeDto.builder()
+                                        .id(pd.getSize().getId())
+                                        .name(pd.getSize().getName())
+                                        .build()
+                        )
+                        .color(
+                                ColorDto.builder()
+                                        .id(pd.getColor().getId())
+                                        .name(pd.getColor().getName())
+                                        .build()
+                        )
+                        .material(
+                                MaterialDto.builder()
+                                        .id(pd.getMaterial().getId())
+                                        .name(pd.getMaterial().getName())
+                                        .build()
+                        )
+                        .listImage(this.imageService.getAllUrlBySecondaryId(pd.getId()))
+                        .build();
+                listProductDetailWebViewDto.add(productDetailWebViewDto);
+            });
+            productWebViewDto.setListProductDetail(listProductDetailWebViewDto);
+            listProductWebViewDto.add(productWebViewDto);
+        });
+        return Response.build().ok().data(listProductWebViewDto);
+    }
+
     @GetMapping("get-all-product-detail-view/{id}")
     public Response getProductViewById(@PathVariable String id) {
         Product product = this.productService.getById(id);

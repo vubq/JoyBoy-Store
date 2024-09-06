@@ -12,11 +12,11 @@
 
         <el-col :span="24">
           <div class="tag-product">
-            <div>SẢN PHẨM MỚI</div>
+            <div style="font-weight: 700;">SẢN PHẨM MỚI</div>
             <el-divider class="custom-divider" />
             <div style="margin-top: 20px;">
               <el-row :gutter="40">
-                <el-col v-for="p in listProductTop5" :key="p.id" :span="6" class="image-container" style="margin-bottom: 40px; cursor: pointer;">
+                <el-col v-for="p in listProductTop5" :key="p.id" :span="6" class="image-container" style="cursor: pointer;">
                   <div @click="toProduct(p.id)">
                     <div>
                       <img
@@ -55,11 +55,54 @@
 
         <el-col :span="24" style="margin-top: 20px;">
           <div class="tag-product">
-            <div>SẢN PHẨM BÁN CHẠY</div>
+            <div style="font-weight: 700;">SẢN PHẨM BÁN CHẠY</div>
             <el-divider class="custom-divider" />
             <div style="margin-top: 20px;">
               <el-row :gutter="40">
-                <el-col v-for="p in listProductTop5BestSelling" :key="p.id" :span="6" class="image-container" style="margin-bottom: 40px; cursor: pointer;">
+                <el-col v-for="p in listProductTop5BestSelling" :key="p.id" :span="6" class="image-container" style="cursor: pointer;">
+                  <div @click="toProduct(p.id)">
+                    <div>
+                      <img
+                        :src="p.listImage[0]"
+                        style="width: 100%; height: 100%;"
+                      >
+
+                      <!-- <div class="combo-button">
+                        <el-row>
+                          <el-col :span="8">
+                            c
+                          </el-col>
+                          <el-col :span="8">
+                            c
+                          </el-col>
+                          <el-col :span="8">
+                            c
+                          </el-col>
+                        </el-row>
+                      </div> -->
+                    </div>
+                    <div style="margin-top: 10px; font-size: 15px;">{{ p.name }}</div>
+                    <div style="margin-top: 5px;">
+                      <el-rate value="4" disabled />
+                    </div>
+                    <div style="margin-top: 5px; font-weight: bold; font-size: 15px;">
+                      <span>{{ formatCurrencyVND(p.priceNet) }}</span>
+                      <span v-if="p.price > p.priceNet" style="text-decoration: line-through; color: rgba(0,0,0,.26); margin-left: 10px;"> {{ formatCurrencyVND(p.price) }}</span>
+                    </div>
+                  </div>
+                </el-col>
+              </el-row>
+            </div>
+          </div>
+        </el-col>
+
+        <el-col :span="24" style="margin-top: 20px; margin-bottom: 100px;">
+          <div class="tag-product">
+            <div style="font-weight: 700;">TẤT CẢ SẢN PHẨM</div>
+            <el-divider class="custom-divider" />
+            <div style="margin-top: 20px;">
+              <el-row :gutter="40">
+                <el-col v-for="p in listProduct" :key="p.id" :span="6" class="image-container" style="cursor: pointer; margin-bottom: 40px;">
                   <div @click="toProduct(p.id)">
                     <div>
                       <img
@@ -101,7 +144,7 @@
 </template>
 
 <script>
-import { productGetTop5ProductCreatedAtDESC, productGetTop5ProductBestSelling } from '@/api/product'
+import { productGetTop5ProductCreatedAtDESC, productGetTop5ProductBestSelling, productGetAllProducts } from '@/api/product'
 import { ResponseCode } from '@/enums/enums'
 import { formatCurrencyVND } from '@/utils/format'
 
@@ -112,7 +155,8 @@ export default {
     return {
       formatCurrencyVND: formatCurrencyVND,
       listProductTop5: [],
-      listProductTop5BestSelling: []
+      listProductTop5BestSelling: [],
+      listProduct: []
     }
   },
   watch: {
@@ -131,6 +175,13 @@ export default {
       console.log(res)
       if (res && res.code === ResponseCode.CODE_SUCCESS) {
         this.listProductTop5BestSelling = res.data
+      }
+    })
+
+    productGetAllProducts().then(res => {
+      console.log(res)
+      if (res && res.code === ResponseCode.CODE_SUCCESS) {
+        this.listProduct = res.data
       }
     })
   },

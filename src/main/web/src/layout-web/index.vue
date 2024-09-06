@@ -161,14 +161,42 @@
 
     <footer>
       <div class="footer-1">
-        //
+        <el-row :gutter="40">
+          <el-col :span="3">
+            <img style="height: 5vh; filter: brightness(0) invert(1); cursor: pointer;" :src="require('@/assets/images/logojb.png')" alt="" @click="toHome">
+          </el-col>
+          <el-col :span="8">
+            <div style="color: #ffffff; line-height: 1.3; font-size: 14px;">
+              Luôn đón đầu các xu hướng thời trang trên thế giới, JoyBoy hướng tới phong cách thời trang tối giản, trẻ trung và hiện đại. Cùng JoyBoy tự tin định hình phong cách thời trang của chính mình, để đón nhận thành công trong cuộc sống. "JoyBoy - Thấu hiểu từng phong cách".
+            </div>
+          </el-col>
+
+          <el-col :span="6" style="color: #ffffff;">
+            <div style="font-size: 16px; font-weight: 700;">
+              Hỗ trợ mua hàng
+            </div>
+            <div style="margin-top: 10px; font-size: 14px;">Tìm kiếm</div>
+            <div style="margin-top: 10px; font-size: 14px;">Chính sách mua hàng online</div>
+            <div style="margin-top: 10px; font-size: 14px;">Chính sách đổi trả</div>
+            <div style="margin-top: 10px; font-size: 14px;">Chính sách bảo hành</div>
+            <div style="margin-top: 10px; font-size: 14px;">Chính sách thẻ thành viên - thẻ VIP</div>
+            <div style="margin-top: 10px; font-size: 14px;">Điều khoản dịch vụ</div>
+          </el-col>
+
+          <el-col :span="6" style="color: #ffffff;">
+            <div style="font-size: 16px; font-weight: 700;">
+              Thông tin liên hệ
+            </div>
+            <div style="margin-top: 10px; font-size: 14px;">CSKH 1900 999 999</div>
+            <div style="margin-top: 10px; font-size: 14px;">MUA HÀNG 0243 9999 999</div>
+            <div style="margin-top: 10px; font-size: 14px;">cskh@joyboy.vn</div>
+          </el-col>
+        </el-row>
       </div>
 
       <div class="footer-2">
         <div>
-          <div>
-            //
-          </div>
+          <div />
         </div>
       </div>
     </footer>
