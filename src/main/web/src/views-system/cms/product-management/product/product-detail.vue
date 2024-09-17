@@ -634,10 +634,7 @@ export default {
               }
 
               this.$router.push({
-                path: '/admin/product-management/product/detail',
-                query: {
-                  id: res.data.id
-                }
+                path: '/admin/product-management/product/list'
               })
             }
           // eslint-disable-next-line no-return-assign
