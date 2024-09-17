@@ -241,6 +241,15 @@ export default {
   name: 'ProductManagementVoucherListPage',
   components: { Pagination },
   data() {
+    const validateUsername = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('Không được để trống'))
+      }
+      if (this.voucher.type === VoucherType.PERCENT && value > 50) {
+        return callback(new Error('Không được quá 50%'))
+      }
+      callback()
+    }
     return {
       moment: moment,
       Status: Status,
@@ -295,7 +304,7 @@ export default {
           { required: true, message: 'Vui lòng chọn', trigger: 'blur' }
         ],
         value: [
-          { required: true, message: 'Không được để trống', trigger: 'blur' }
+          { validator: validateUsername, trigger: 'blur' }
         ],
         quantity: [
           { required: true, message: 'Không được để trống', trigger: 'blur' }

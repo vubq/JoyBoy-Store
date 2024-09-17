@@ -17,6 +17,7 @@ router.beforeEach(async(to, from, next) => {
   const hasToken = getToken()
 
   if (hasToken) {
+    const { roles } = await store.dispatch('user/getInfo')
     console.log(store.getters.roles)
     if (to.path === '/admin/login' && !store.getters.roles.includes(Role.ROLE_CUSTOMER)) {
       next({ path: '/' })
@@ -32,7 +33,6 @@ router.beforeEach(async(to, from, next) => {
       next({ path: to.path })
     } else {
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
-      const { roles } = await store.dispatch('user/getInfo')
       const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
       if (hasRoles) {
         next()
